@@ -18,134 +18,193 @@
                             800: '#1e293b',
                             700: '#334155',
                             600: '#475569'
+                        },
+                        brand: {
+                            500: 'var(--brand-color, #10b981)',
+                            600: 'var(--brand-dark, #059669)'
                         }
                     }
                 }
             }
         }
     </script>
+    <style>
+        :root {
+            --brand-color: #10b981;
+            --brand-dark: #059669;
+        }
+        .custom-accent {
+            background-color: var(--brand-color);
+        }
+        .custom-accent:hover {
+            background-color: var(--brand-dark);
+        }
+        .custom-text {
+            color: var(--brand-color);
+        }
+        .custom-border {
+            border-color: var(--brand-color);
+        }
+    </style>
 </head>
 <body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-emerald-500 selection:text-white">
 
-    <!-- Top Navigation -->
-    <header class="bg-dark-800 border-b border-dark-700 sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="bg-emerald-500/10 text-emerald-400 p-2.5 rounded-xl border border-emerald-500/20">
-                    <i class="fa-solid fa-utensils text-xl"></i>
+    <!-- Auth Overlay / Login Screen -->
+    <div id="authScreen" class="fixed inset-0 bg-dark-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6">
+            <div class="text-center space-y-2">
+                <div class="inline-flex bg-brand-500/10 text-brand-500 p-3 rounded-2xl border border-brand-500/20 mb-2">
+                    <i class="fa-solid fa-utensils text-2xl"></i>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                        AYCE Profit Tracker <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">v3.0 Cloud</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Shabuya • X-Fish • KBBQ Value Engine</p>
-                </div>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">AYCE Profit Tracker</h2>
+                <p id="authSubtitle" class="text-xs text-slate-400">Sign in to sync your culinary profits across devices</p>
             </div>
 
-            <div class="flex items-center space-x-3">
-                <div id="cloudStatus" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Synced
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Email Address</label>
+                    <input type="email" id="authEmail" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" placeholder="you@example.com">
                 </div>
-                <button onclick="openLogModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg shadow-emerald-900/30 transition flex items-center gap-2">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Password</label>
+                    <input type="password" id="authPassword" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500" placeholder="••••••••">
+                </div>
+                <div id="authError" class="text-xs text-rose-400 hidden"></div>
+                
+                <button onclick="handleAuthSubmit()" id="authSubmitBtn" class="w-full custom-accent text-white font-semibold py-2.5 rounded-xl shadow-lg transition">
+                    Sign In
+                </button>
+            </div>
+
+            <div class="text-center">
+                <button onclick="toggleAuthMode()" id="authToggleBtn" class="text-xs text-slate-400 hover:text-white transition">
+                    Don't have an account? <span class="custom-text font-semibold">Sign Up</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation -->
+    <header class="bg-dark-800 border-b border-dark-700 sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-brand-500/10 text-brand-500 p-2.5 rounded-xl border border-brand-500/20">
+                        <i class="fa-solid fa-utensils text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                            AYCE Profit Tracker <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/20 custom-text border border-brand-500/30">Cloud</span>
+                        </h1>
+                        <p class="text-[11px] text-slate-400">Shabuya • X-Fish • KBBQ Value Engine</p>
+                    </div>
+                </div>
+                <!-- Mobile Settings Button -->
+                <button onclick="openSettingsModal()" class="sm:hidden bg-dark-700 hover:bg-dark-600 text-slate-200 p-2.5 rounded-xl transition">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+                <div id="cloudStatus" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brand-500/10 custom-text border border-brand-500/20 text-xs font-medium">
+                    <span class="w-2 h-2 rounded-full custom-accent animate-pulse"></span> <span id="userEmailDisplay">Synced</span>
+                </div>
+                <button onclick="openLogModal()" class="custom-accent text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-lg transition flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Log Meal
+                </button>
+                <button onclick="openSettingsModal()" class="hidden sm:flex bg-dark-700 hover:bg-dark-600 text-slate-200 p-2.5 rounded-xl transition items-center justify-center">
+                    <i class="fa-solid fa-gear text-base"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:py-8 flex-grow w-full space-y-6 sm:space-y-8">
         
         <!-- Dashboard Analytics -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-5 shadow-sm">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Net Profit</p>
-                        <h3 id="statTotalProfit" class="text-3xl font-extrabold text-emerald-400 mt-1">$0.00</h3>
+                        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Net Profit</p>
+                        <h3 id="statTotalProfit" class="text-2xl sm:text-3xl font-extrabold custom-text mt-1">$0.00</h3>
                     </div>
-                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><i class="fa-solid fa-piggy-bank text-lg"></i></div>
+                    <div class="p-2.5 sm:p-3 bg-brand-500/10 custom-text rounded-xl"><i class="fa-solid fa-piggy-bank text-base sm:text-lg"></i></div>
                 </div>
-                <p id="statProfitSubtitle" class="text-xs text-slate-400 mt-2">Overall value generated</p>
+                <p class="text-[11px] text-slate-400 mt-2">Overall value generated</p>
             </div>
 
-            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-5 shadow-sm">
+            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Meals Logged</p>
-                        <h3 id="statTotalMeals" class="text-3xl font-extrabold text-white mt-1">0</h3>
+                        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Meals</p>
+                        <h3 id="statTotalMeals" class="text-2xl sm:text-3xl font-extrabold text-white mt-1">0</h3>
                     </div>
-                    <div class="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><i class="fa-solid fa-receipt text-lg"></i></div>
+                    <div class="p-2.5 sm:p-3 bg-blue-500/10 text-blue-400 rounded-xl"><i class="fa-solid fa-receipt text-base sm:text-lg"></i></div>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">Across all categories</p>
+                <p class="text-[11px] text-slate-400 mt-2">Across all categories</p>
             </div>
 
-            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-5 shadow-sm">
+            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Avg Profit / Meal</p>
-                        <h3 id="statAvgProfit" class="text-3xl font-extrabold text-indigo-400 mt-1">$0.00</h3>
+                        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Avg Profit / Meal</p>
+                        <h3 id="statAvgProfit" class="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1">$0.00</h3>
                     </div>
-                    <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fa-solid fa-chart-line text-lg"></i></div>
+                    <div class="p-2.5 sm:p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><i class="fa-solid fa-chart-line text-base sm:text-lg"></i></div>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">Net gain per sitting</p>
+                <p class="text-[11px] text-slate-400 mt-2">Net gain per sitting</p>
             </div>
 
-            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-5 shadow-sm">
+            <div class="bg-dark-800 border border-dark-700/80 rounded-2xl p-4 sm:p-5 shadow-sm">
                 <div class="flex justify-between items-start">
                     <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Spent</p>
-                        <h3 id="statTotalSpent" class="text-3xl font-extrabold text-amber-400 mt-1">$0.00</h3>
+                        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Spent</p>
+                        <h3 id="statTotalSpent" class="text-2xl sm:text-3xl font-extrabold text-amber-400 mt-1">$0.00</h3>
                     </div>
-                    <div class="p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-wallet text-lg"></i></div>
+                    <div class="p-2.5 sm:p-3 bg-amber-500/10 text-amber-400 rounded-xl"><i class="fa-solid fa-wallet text-base sm:text-lg"></i></div>
                 </div>
-                <p class="text-xs text-slate-400 mt-2">Out-of-pocket investment</p>
+                <p class="text-[11px] text-slate-400 mt-2">Out-of-pocket investment</p>
             </div>
         </div>
 
         <!-- History & Logs Section -->
-        <div class="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-sm space-y-6">
+        <div class="bg-dark-800 border border-dark-700 rounded-2xl p-4 sm:p-6 shadow-sm space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-white">Meal History & Profit Breakdown</h2>
+                    <h2 class="text-base sm:text-lg font-bold text-white">Meal History & Profit Breakdown</h2>
                     <p class="text-xs text-slate-400">Review what you ate, itemized wholesale/unit valuations, and group savings.</p>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto">
-                    <button onclick="openLogModal()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i> New Log
-                    </button>
-                </div>
+                <button onclick="openLogModal()" class="w-full sm:w-auto custom-accent text-white px-4 py-2 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> New Log
+                </button>
             </div>
 
             <div id="historyContainer" class="space-y-4">
-                <!-- Dynamically populated meal history logs -->
-                <div class="text-center py-12 text-slate-500 border border-dashed border-dark-700 rounded-xl">
-                    <i class="fa-solid fa-bowl-food text-4xl mb-3 opacity-40"></i>
-                    <p class="text-sm font-medium">No AYCE sessions logged yet.</p>
-                    <p class="text-xs text-slate-600 mt-1">Click "Log Meal" to start tracking your food profits!</p>
-                </div>
+                <!-- Populated dynamically -->
             </div>
         </div>
     </main>
 
     <!-- Log Meal Modal -->
-    <div id="logModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-dark-800 border border-dark-700 w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="p-5 border-b border-dark-700 flex justify-between items-center bg-dark-800/80 sticky top-0 z-10">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-utensils text-emerald-400"></i> Log AYCE Session
+    <div id="logModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="p-4 sm:p-5 border-b border-dark-700 flex justify-between items-center bg-dark-800/90 sticky top-0 z-10">
+                <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-utensils custom-text"></i> Log AYCE Session
                 </h3>
                 <button onclick="closeLogModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-dark-700 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <div class="p-6 overflow-y-auto space-y-6 flex-grow">
-                <!-- Step 1: Basic Info -->
+            <div class="p-4 sm:p-6 overflow-y-auto space-y-6 flex-grow">
+                <input type="hidden" id="editingMealId" value="">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Restaurant Category</label>
-                        <select id="mealCategory" onchange="switchCategory()" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <select id="mealCategory" onchange="switchCategory()" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
                             <option value="hotpot">Shabuya (Hot Pot)</option>
                             <option value="sushi">X-Fish Izakaya (Sushi)</option>
                             <option value="kbbq">Korean BBQ (KBBQ)</option>
@@ -153,64 +212,126 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Restaurant Name</label>
-                        <input type="text" id="restaurantName" value="Shabuya" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <input type="text" id="restaurantName" value="Shabuya" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1">Total Ticket Price Paid ($)</label>
-                        <input type="number" id="ticketPrice" value="29.99" step="0.01" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <input type="number" id="ticketPrice" value="29.99" step="0.01" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">People in Party (How many you ate with + you)</label>
-                        <input type="number" id="partySize" value="1" min="1" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                        <p class="text-[10px] text-slate-500 mt-1">Ticket price is multiplied by party size to calculate total investment.</p>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">People in Party (You + Guests)</label>
+                        <input type="number" id="partySize" value="1" min="1" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
                     </div>
                 </div>
 
-                <!-- Step 2: Food Checklists -->
                 <div>
                     <div class="flex justify-between items-center mb-3">
-                        <h4 class="text-sm font-bold text-white uppercase tracking-wider">Select Consumed Items & Quantities</h4>
-                        <span class="text-xs text-slate-400">Values are calibrated to estimated restaurant unit cost</span>
+                        <h4 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">Select Consumed Items</h4>
+                        <span class="text-[11px] text-slate-400">Unit wholesale valuation</span>
                     </div>
-                    <div id="foodChecklist" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto pr-1">
+                    <div id="foodChecklist" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
                         <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="p-4 border-t border-dark-700 bg-dark-800/80 flex justify-between items-center">
+            <div class="p-4 border-t border-dark-700 bg-dark-800/90 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="text-sm">
                     <span class="text-slate-400">Estimated Value: </span>
-                    <span id="modalEstValue" class="font-extrabold text-emerald-400">$0.00</span>
+                    <span id="modalEstValue" class="font-extrabold custom-text">$0.00</span>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="closeLogModal()" class="px-4 py-2 rounded-xl border border-dark-700 text-slate-300 hover:bg-dark-700 text-sm font-medium transition">Cancel</button>
-                    <button onclick="saveMealLog()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-900/30 transition">Save & Calculate Profit</button>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="closeLogModal()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl border border-dark-700 text-slate-300 hover:bg-dark-700 text-sm font-medium transition">Cancel</button>
+                    <button onclick="saveMealLog()" class="flex-1 sm:flex-none px-5 py-2 rounded-xl custom-accent text-white text-sm font-semibold shadow-lg transition">Save Session</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden p-6 space-y-6">
+            <div class="flex justify-between items-center border-b border-dark-700 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gear custom-text"></i> Settings & Account
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-dark-700 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Account Credentials Update -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Account Credentials</h4>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Update Email</label>
+                        <input type="email" id="settingsEmail" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Update Password</label>
+                        <input type="password" id="settingsPassword" placeholder="New password (leave blank to keep current)" class="w-full bg-dark-900 border border-dark-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    </div>
+                    <button onclick="updateAccountCredentials()" class="w-full bg-dark-700 hover:bg-dark-600 text-white text-xs font-semibold py-2 rounded-xl transition">
+                        Save Credentials
+                    </button>
+                    <div id="settingsMessage" class="text-xs text-emerald-400 text-center hidden"></div>
+                </div>
+
+                <!-- Theme Color Wheel -->
+                <div class="space-y-3 pt-2 border-t border-dark-700">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">App Theme Spectrum Color</h4>
+                    <div class="flex items-center gap-3">
+                        <input type="color" id="themeColorPicker" value="#10b981" onchange="applyTheme(this.value)" class="w-12 h-10 bg-transparent rounded-xl cursor-pointer border border-dark-700">
+                        <div class="flex-grow">
+                            <span class="text-xs text-slate-300 block">Pick your accent color</span>
+                            <span class="text-[10px] text-slate-500">Instantly updates buttons and highlights across UI</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-1">
+                        <button onclick="applyTheme('#10b981')" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-lg border border-emerald-500/30">Emerald</button>
+                        <button onclick="applyTheme('#3b82f6')" class="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-lg border border-blue-500/30">Blue</button>
+                        <button onclick="applyTheme('#8b5cf6')" class="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-lg border border-purple-500/30">Purple</button>
+                        <button onclick="applyTheme('#f59e0b')" class="px-3 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-lg border border-amber-500/30">Amber</button>
+                    </div>
+                </div>
+
+                <!-- Sign Out -->
+                <div class="pt-2 border-t border-dark-700">
+                    <button onclick="handleSignOut()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-dark-800 border border-dark-700 w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/20">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+            </div>
+            <h3 id="confirmTitle" class="text-lg font-bold text-white">Are you sure?</h3>
+            <p id="confirmDesc" class="text-xs text-slate-400">This action cannot be undone.</p>
+            <div class="flex gap-2 pt-2">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-dark-700 hover:bg-dark-600 text-slate-300 text-xs font-semibold py-2.5 rounded-xl transition">Cancel</button>
+                <button id="confirmActionBtn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold py-2.5 rounded-xl transition">Confirm</button>
             </div>
         </div>
     </div>
 
     <!-- Application Script -->
     <script>
-        // Supabase Integration Setup
         const SUPABASE_URL = 'https://vwusevuresnpqxzziij.supabase.co';
         const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_s3mBhlGJskNcm-3ilZeiGQ_frgkhT0D';
         
         let supabaseClient = null;
-        let useCloud = false;
+        let currentUser = null;
+        let mealLogs = [];
+        let isSignUp = false;
+        let pendingConfirmCallback = null;
 
-        try {
-            if (window.supabase && SUPABASE_PUBLISHABLE_KEY && !SUPABASE_PUBLISHABLE_KEY.includes('YOUR_KEY')) {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-                useCloud = true;
-            }
-        } catch (e) {
-            console.warn('Cloud sync initialization failed, falling back to local storage:', e);
-        }
-
-        // True restaurant unit-cost catalogues (calibrated to actual individual portions / wholesale / slice costs)
         const MENUS = {
             hotpot: {
                 name: "Shabuya (Hot Pot)",
@@ -266,17 +387,108 @@
             }
         };
 
-        let mealLogs = [];
-
-        // Initialize App
+        // Initialize Supabase & App
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadMeals();
+            try {
+                if (window.supabase && SUPABASE_PUBLISHABLE_KEY) {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    if (session) {
+                        currentUser = session.user;
+                        onUserSignedIn();
+                    }
+                }
+            } catch (e) {
+                console.warn('Supabase auth init error:', e);
+            }
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('ayce_theme_color');
+            if (savedTheme) {
+                applyTheme(savedTheme, false);
+            }
             switchCategory();
         });
 
-        // Cloud / Local Storage Data Sync
+        // Theme Customizer
+        function applyTheme(colorHex, save = true) {
+            document.documentElement.style.setProperty('--brand-color', colorHex);
+            // compute darker shade for hover
+            let darkHex = colorHex;
+            document.getElementById('themeColorPicker').value = colorHex;
+            if (save) {
+                localStorage.setItem('ayce_theme_color', colorHex);
+            }
+        }
+
+        // Auth Handlers
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('authSubtitle.textContent') = isSignUp ? 'Create a new account' : 'Sign in to sync your culinary profits';
+            document.getElementById('authSubmitBtn').textContent = isSignUp ? 'Sign Up' : 'Sign In';
+            document.getElementById('authToggleBtn').innerHTML = isSignUp ? 'Already have an account? <span class="custom-text font-semibold">Sign In</span>' : "Don't have an account? <span class="custom-text font-semibold">Sign Up</span>";
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const errEl = document.getElementById('authError');
+            errEl.classList.add('hidden');
+
+            if (!email || !password) {
+                errEl.textContent = 'Please enter both email and password.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+
+            if (!supabaseClient) {
+                // Mock Auth if offline/fallback
+                currentUser = { id: 'local_user', email: email };
+                onUserSignedIn();
+                return;
+            }
+
+            try {
+                if (isSignUp) {
+                    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+                    if (error) throw error;
+                    if (data.user) {
+                        currentUser = data.user;
+                        onUserSignedIn();
+                    }
+                } else {
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    if (data.user) {
+                        currentUser = data.user;
+                        onUserSignedIn();
+                    }
+                }
+            } catch (err) {
+                errEl.textContent = err.message || 'Authentication failed.';
+                errEl.classList.remove('hidden');
+            }
+        }
+
+        async function handleSignOut() {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            currentUser = null;
+            document.getElementById('authScreen').classList.remove('hidden');
+            closeSettingsModal();
+        }
+
+        function onUserSignedIn() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('userEmailDisplay').textContent = currentUser.email || 'Cloud Synced';
+            document.getElementById('settingsEmail').value = currentUser.email || '';
+            loadMeals();
+        }
+
+        // Load / Save Meals
         async function loadMeals() {
-            if (useCloud && supabaseClient) {
+            if (supabaseClient && currentUser && currentUser.id !== 'local_user') {
                 try {
                     const { data, error } = await supabaseClient.from('ayce_logs').select('*').order('date', { ascending: false });
                     if (!error && data) {
@@ -293,57 +505,76 @@
                         }));
                         updateDashboard();
                         renderHistory();
-                        document.getElementById('cloudStatus').style.display = 'flex';
                         return;
                     }
-                } catch (err) {
-                    console.warn('Supabase fetch error, falling back to localStorage:', err);
+                } catch (e) {
+                    console.warn('Cloud fetch error:', e);
                 }
             }
 
-            // Fallback to LocalStorage
-            const local = localStorage.getItem('ayce_logs_v3');
+            // LocalStorage fallback
+            const local = localStorage.getItem('ayce_logs_v4');
             if (local) {
-                try {
-                    mealLogs = JSON.parse(local);
-                } catch (e) {
-                    mealLogs = [];
-                }
+                try { mealLogs = JSON.parse(local); } catch (e) { mealLogs = []; }
             }
-            document.getElementById('cloudStatus').style.display = 'none';
             updateDashboard();
             renderHistory();
         }
 
         async function saveMealsToStorage() {
-            if (useCloud && supabaseClient) {
-                try {
-                    // Sync latest item to Supabase if desired or save entire state
-                } catch (err) {
-                    console.warn('Cloud sync save error:', err);
-                }
-            }
-            localStorage.setItem('ayce_logs_v3', JSON.stringify(mealLogs));
+            localStorage.setItem('ayce_logs_v4', JSON.stringify(mealLogs));
             updateDashboard();
             renderHistory();
         }
 
         // Modal Controls
-        function openLogModal() {
+        function openLogModal(mealId = null) {
+            document.getElementById('editingMealId').value = mealId || '';
+            document.getElementById('modalTitle').innerHTML = mealId ? '<i class="fa-solid fa-pen custom-text"></i> Edit AYCE Session' : '<i class="fa-solid fa-utensils custom-text"></i> Log AYCE Session';
+            
+            if (mealId) {
+                const log = mealLogs.find(l => l.id === mealId);
+                if (log) {
+                    document.getElementById('mealCategory').value = log.category;
+                    switchCategory();
+                    document.getElementById('restaurantName').value = log.restaurant;
+                    document.getElementById('ticketPrice').value = log.ticketPrice;
+                    document.getElementById('partySize').value = log.partySize;
+
+                    // populate item counts
+                    setTimeout(() => {
+                        Object.keys(log.items).forEach(itemId => {
+                            const input = document.getElementById(`item_${itemId}`);
+                            if (input) input.value = log.items[itemId].count;
+                        });
+                        calculateModalEstimate();
+                    }, 50);
+                }
+            } else {
+                switchCategory();
+            }
             document.getElementById('logModal').classList.remove('hidden');
-            switchCategory();
         }
 
         function closeLogModal() {
             document.getElementById('logModal').classList.add('hidden');
         }
 
-        // Category Switcher in Modal
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
         function switchCategory() {
             const catKey = document.getElementById('mealCategory').value;
             const menu = MENUS[catKey];
-            document.getElementById('restaurantName').value = menu.name.split(' ')[0] == 'Shabuya' ? 'Shabuya' : (menu.name.split(' ')[0] == 'X-Fish' ? 'X-Fish Izakaya' : 'KBBQ Spot');
-            document.getElementById('ticketPrice').value = menu.defaultPrice;
+            if (!document.getElementById('editingMealId').value) {
+                document.getElementById('restaurantName').value = menu.name.split(' ')[0];
+                document.getElementById('ticketPrice').value = menu.defaultPrice;
+            }
 
             const checklistEl = document.getElementById('foodChecklist');
             checklistEl.innerHTML = '';
@@ -354,12 +585,12 @@
                 div.innerHTML = `
                     <div class="pr-2">
                         <div class="text-xs font-semibold text-slate-200">${item.name}</div>
-                        <div class="text-[10px] text-emerald-400">$${item.unitCost.toFixed(2)} per ${item.unitName}</div>
+                        <div class="text-[10px] custom-text">$${item.unitCost.toFixed(2)} per ${item.unitName}</div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button type="button" onclick="adjustCount('${item.id}', -1)" class="w-7 h-7 bg-dark-800 hover:bg-dark-700 rounded-lg text-slate-300 text-xs font-bold flex items-center justify-center transition">-</button>
+                        <button type="button" onclick="adjustCount('${item.id}', -1)" class="w-7 h-7 bg-dark-800 hover:bg-dark-700 rounded-lg text-slate-300 text-xs font-bold flex items-center justify-center">-</button>
                         <input type="number" id="item_${item.id}" value="0" min="0" oninput="calculateModalEstimate()" class="w-12 text-center bg-dark-800 border border-dark-700 rounded-lg text-xs py-1 text-white focus:outline-none">
-                        <button type="button" onclick="adjustCount('${item.id}', 1)" class="w-7 h-7 bg-dark-800 hover:bg-dark-700 rounded-lg text-slate-300 text-xs font-bold flex items-center justify-center transition">+</button>
+                        <button type="button" onclick="adjustCount('${item.id}', 1)" class="w-7 h-7 bg-dark-800 hover:bg-dark-700 rounded-lg text-slate-300 text-xs font-bold flex items-center justify-center">+</button>
                     </div>
                 `;
                 checklistEl.appendChild(div);
@@ -391,8 +622,8 @@
             document.getElementById('modalEstValue').textContent = `$${estValue.toFixed(2)}`;
         }
 
-        // Save Meal Log
         async function saveMealLog() {
+            const editingId = document.getElementById('editingMealId').value;
             const catKey = document.getElementById('mealCategory').value;
             const menu = MENUS[catKey];
             const restaurant = document.getElementById('restaurantName').value || menu.name;
@@ -420,8 +651,8 @@
             const totalInvestment = ticketPrice * partySize;
             const profit = estValue - totalInvestment;
 
-            const newLog = {
-                id: 'log_' + Date.now(),
+            const mealData = {
+                id: editingId || ('log_' + Date.now()),
                 category: catKey,
                 restaurant: restaurant,
                 ticketPrice: ticketPrice,
@@ -432,45 +663,95 @@
                 date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             };
 
-            if (useCloud && supabaseClient) {
+            if (supabaseClient && currentUser && currentUser.id !== 'local_user') {
                 try {
-                    const { error } = await supabaseClient.from('ayce_logs').insert([{
-                        id: newLog.id,
-                        category: newLog.category,
-                        restaurant: newLog.restaurant,
-                        ticket_price: newLog.ticketPrice,
-                        party_size: newLog.partySize,
-                        items_eaten: newLog.items,
-                        est_value: newLog.estValue,
-                        profit: newLog.profit,
-                        date: newLog.date
+                    await supabaseClient.from('ayce_logs').upsert([{
+                        id: mealData.id,
+                        category: mealData.category,
+                        restaurant: mealData.restaurant,
+                        ticket_price: mealData.ticketPrice,
+                        party_size: mealData.partySize,
+                        items_eaten: mealData.items,
+                        est_value: mealData.estValue,
+                        profit: mealData.profit,
+                        date: mealData.date
                     }]);
-                    if (error) console.warn('Supabase insert error:', error);
-                } catch (err) {
-                    console.warn('Cloud sync error:', err);
+                } catch (e) {
+                    console.warn('Supabase upsert error:', e);
                 }
             }
 
-            mealLogs.unshift(newLog);
+            if (editingId) {
+                mealLogs = mealLogs.map(l => l.id === editingId ? mealData : l);
+            } else {
+                mealLogs.unshift(mealData);
+            }
+
             saveMealsToStorage();
             closeLogModal();
         }
 
-        async function deleteLog(id) {
-            if (confirm('Are you sure you want to delete this meal log?')) {
-                if (useCloud && supabaseClient) {
-                    try {
-                        await supabaseClient.from('ayce_logs').delete().eq('id', id);
-                    } catch (err) {
-                        console.warn('Cloud delete error:', err);
-                    }
+        // Confirmation Modal Logic
+        function showConfirmModal(title, desc, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmDesc').textContent = desc;
+            pendingConfirmCallback = onConfirm;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            pendingConfirmCallback = null;
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if (pendingConfirmCallback) pendingConfirmCallback();
+            closeConfirmModal();
+        });
+
+        function confirmDeleteLog(id) {
+            showConfirmModal('Delete Meal Log?', 'Are you sure you want to remove this session from your history?', async () => {
+                if (supabaseClient && currentUser && currentUser.id !== 'local_user') {
+                    try { await supabaseClient.from('ayce_logs').delete().eq('id', id); } catch (e) {}
                 }
                 mealLogs = mealLogs.filter(l => l.id !== id);
                 saveMealsToStorage();
+            });
+        }
+
+        async function updateAccountCredentials() {
+            const newEmail = document.getElementById('settingsEmail').value.trim();
+            const newPassword = document.getElementById('settingsPassword').value;
+            const msgEl = document.getElementById('settingsMessage');
+
+            if (!supabaseClient || !currentUser || currentUser.id === 'local_user') {
+                msgEl.textContent = 'Credentials updated locally!';
+                msgEl.classList.remove('hidden');
+                setTimeout(() => msgEl.classList.add('hidden'), 3000);
+                return;
+            }
+
+            try {
+                let updates = {};
+                if (newEmail && newEmail !== currentUser.email) updates.email = newEmail;
+                if (newPassword) updates.password = newPassword;
+
+                if (Object.keys(updates).length > 0) {
+                    const { error } = await supabaseClient.auth.updateUser(updates);
+                    if (error) throw error;
+                }
+
+                msgEl.textContent = 'Account successfully updated!';
+                msgEl.classList.remove('hidden');
+                setTimeout(() => msgEl.classList.add('hidden'), 3000);
+            } catch (err) {
+                msgEl.textContent = err.message || 'Update failed.';
+                msgEl.className = 'text-xs text-rose-400 text-center';
+                msgEl.classList.remove('hidden');
             }
         }
 
-        // Render Dashboard Stats
+        // Dashboard & UI Rendering
         function updateDashboard() {
             const totalMeals = mealLogs.length;
             let totalProfit = 0;
@@ -487,16 +768,8 @@
             document.getElementById('statTotalMeals').textContent = totalMeals;
             document.getElementById('statAvgProfit').textContent = `${avgProfit >= 0 ? '+' : ''}$${avgProfit.toFixed(2)}`;
             document.getElementById('statTotalSpent').textContent = `$${totalSpent.toFixed(2)}`;
-
-            const profitEl = document.getElementById('statTotalProfit');
-            if (totalProfit >= 0) {
-                profitEl.className = 'text-3xl font-extrabold text-emerald-400 mt-1';
-            } else {
-                profitEl.className = 'text-3xl font-extrabold text-rose-400 mt-1';
-            }
         }
 
-        // Render History UI
         function renderHistory() {
             const container = document.getElementById('historyContainer');
             if (mealLogs.length === 0) {
@@ -516,20 +789,20 @@
                 const totalInvestment = log.ticketPrice * log.partySize;
                 
                 const card = document.createElement('div');
-                card.className = 'bg-dark-900 border border-dark-700/80 rounded-xl p-4 sm:p-5 transition hover:border-dark-600 space-y-4';
+                card.className = 'bg-dark-900 border border-dark-700/80 rounded-2xl p-4 sm:p-5 transition hover:border-dark-600 space-y-4';
                 
                 let itemsListHtml = '';
                 Object.values(log.items).forEach(item => {
                     itemsListHtml += `
-                        <div class="flex justify-between items-center text-xs bg-dark-800 px-3 py-1.5 rounded-lg border border-dark-700/50">
+                        <div class="flex justify-between items-center text-xs bg-dark-800 px-3 py-1.5 rounded-xl border border-dark-700/50">
                             <span class="text-slate-300 font-medium">${item.name} <span class="text-slate-500">×${item.count}</span></span>
-                            <span class="text-emerald-400 font-semibold">+$${item.totalCost.toFixed(2)}</span>
+                            <span class="custom-text font-semibold">+$${item.totalCost.toFixed(2)}</span>
                         </div>
                     `;
                 });
 
                 card.innerHTML = `
-                    <div class="flex flex-wrap justify-between items-start gap-2 border-b border-dark-700/60 pb-3">
+                    <div class="flex flex-wrap justify-between items-start gap-3 border-b border-dark-700/60 pb-3">
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="font-bold text-white text-base">${log.restaurant}</h3>
@@ -537,16 +810,21 @@
                             </div>
                             <p class="text-xs text-slate-400 mt-0.5">${log.date} • Party of ${log.partySize} ($${log.ticketPrice.toFixed(2)}/person)</p>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
                             <div class="text-right">
-                                <div class="text-xs text-slate-400">Net Profit</div>
-                                <div class="text-lg font-extrabold ${isProfitable ? 'text-emerald-400' : 'text-rose-400'}">
+                                <div class="text-[11px] text-slate-400">Net Profit</div>
+                                <div class="text-base sm:text-lg font-extrabold ${isProfitable ? 'text-emerald-400' : 'text-rose-400'}">
                                     ${isProfitable ? '+' : ''}$${log.profit.toFixed(2)}
                                 </div>
                             </div>
-                            <button onclick="deleteLog('${log.id}')" class="text-slate-500 hover:text-rose-400 p-2 rounded-lg hover:bg-dark-800 transition">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
+                            <div class="flex items-center space-x-1 ml-2">
+                                <button onclick="openLogModal('${log.id}')" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-dark-800 transition" title="Edit Meal">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="confirmDeleteLog('${log.id}')" class="text-slate-400 hover:text-rose-400 p-2 rounded-lg hover:bg-dark-800 transition" title="Delete Meal">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -557,7 +835,7 @@
                         </div>
                         <div>
                             <span class="text-slate-500 block">Menu Value Eaten</span>
-                            <span class="font-bold text-emerald-400">$${log.estValue.toFixed(2)}</span>
+                            <span class="font-bold custom-text">$${log.estValue.toFixed(2)}</span>
                         </div>
                         <div>
                             <span class="text-slate-500 block">ROI Multiplier</span>
