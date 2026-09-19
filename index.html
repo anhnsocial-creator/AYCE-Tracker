@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AYCE Profit Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar styling for slick UI */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 h-full font-sans antialiased selection:bg-rose-500 selection:text-white">
+
+    <div id="app" class="min-h-full flex flex-col">
+        
+        <!-- ================= AUTH VIEW ================= -->
+        <div id="auth-view" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+            <div class="max-w-md w-full bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-8 space-y-6">
+                <div class="text-center space-y-2">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 mb-2 border border-rose-500/20">
+                        <i class="fa-solid fa-utensils text-2xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold tracking-tight text-white">AYCE Profit Tracker</h1>
+                    <p class="text-sm text-slate-400">Track your Shabuya, X-Fish, and KBBQ feast value</p>
+                </div>
+
+                <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                        <input type="text" id="auth-username" required 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+                            placeholder="e.g. FoodieKing">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                        <input type="password" id="auth-password" required 
+                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+                            placeholder="••••••••">
+                    </div>
+                    <button type="submit" 
+                        class="w-full bg-rose-600 hover:bg-rose-500 text-white font-medium py-3 rounded-xl transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center space-x-2">
+                        <span>Sign In / Register</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= MAIN APP CONTAINER (Hidden initially) ================= -->
+        <div id="main-app" class="hidden flex-1 flex flex-col h-full overflow-hidden">
+            
+            <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
+                        <i class="fa-solid fa-fire text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-white tracking-tight text-lg">AYCE Profit Tracker</h2>
+                        <p class="text-xs text-slate-400">Logged in as <span id="display-username" class="text-rose-400 font-semibold"></span></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-rose-600 text-white shadow-md shadow-rose-600/20">
+                        <i class="fa-solid fa-chart-pie mr-2"></i>Dashboard
+                    </button>
+                    <button onclick="switchTab('logger')" id="nav-logger" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800">
+                        <i class="fa-solid fa-plus-circle mr-2"></i>New Session
+                    </button>
+                    <button onclick="switchTab('market')" id="nav-market" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800">
+                        <i class="fa-solid fa-tags mr-2"></i>Market Rates
+                    </button>
+                    <button onclick="handleLogout()" class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors ml-2" title="Sign Out">
+                        <i class="fa-solid fa-right-from-bracket text-lg"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-900">
+                
+                <!-- 1. DASHBOARD VIEW -->
+                <div id="view-dashboard" class="space-y-6 max-w-7xl mx-auto">
+                    <!-- Metrics Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Profit Made</span>
+                                <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm"><i class="fa-solid fa-chart-line"></i></span>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <h3 id="stat-total-profit" class="text-3xl font-bold text-emerald-400">$0.00</h3>
+                                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-medium">Value Gained</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Savings</span>
+                                <span class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm"><i class="fa-solid fa-piggy-bank"></i></span>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <h3 id="stat-net-savings" class="text-3xl font-bold text-indigo-400">$0.00</h3>
+                                <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-medium">Overall</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Spent (Tickets)</span>
+                                <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm"><i class="fa-solid fa-receipt"></i></span>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <h3 id="stat-total-spent" class="text-3xl font-bold text-white">$0.00</h3>
+                                <span class="text-xs text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full font-medium">Cost</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Sessions</span>
+                                <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm"><i class="fa-solid fa-calendar-check"></i></span>
+                            </div>
+                            <div class="mt-3 flex items-baseline justify-between">
+                                <h3 id="stat-total-sessions" class="text-3xl font-bold text-white">0</h3>
+                                <span class="text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-medium">Feasts Logged</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- History Table Section -->
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
+                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-lg text-white">Feast History</h3>
+                                <p class="text-xs text-slate-400">Review past AYCE sessions and locked historical values</p>
+                            </div>
+                            <button onclick="switchTab('logger')" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-rose-600/20">
+                                <i class="fa-solid fa-plus mr-2"></i>Log New Feast
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Date</th>
+                                        <th class="p-4">Category</th>
+                                        <th class="p-4">Ticket Cost</th>
+                                        <th class="p-4">Market Value</th>
+                                        <th class="p-4">Profit / Savings</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-table-body" class="divide-y divide-slate-800 text-sm">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. LOGGER VIEW -->
+                <div id="view-logger" class="hidden space-y-6 max-w-5xl mx-auto">
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                        <div class="border-b border-slate-800 pb-4">
+                            <h3 class="text-xl font-bold text-white">New AYCE Feast Logger</h3>
+                            <p class="text-xs text-slate-400">Select restaurant, date, ticket price, and tally your dishes</p>
+                        </div>
+
+                        <!-- Session Configuration Header -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Category / Restaurant</label>
+                                <select id="log-category" onchange="onCategoryChange()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                                    <option value="Shabuya">Shabuya (Hot Pot)</option>
+                                    <option value="X-Fish">X-Fish Izakaya (Sushi & Rolls)</option>
+                                    <option value="KBBQ">KBBQ (Korean BBQ)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Date</label>
+                                <input type="date" id="log-date" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Flat Ticket Price ($)</label>
+                                <input type="number" step="0.01" id="log-ticket-price" placeholder="32.99" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                            </div>
+                        </div>
+
+                        <!-- Custom Item Creator -->
+                        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row gap-3 items-end">
+                            <div class="flex-1 w-full">
+                                <label class="block text-xs font-medium text-slate-400 mb-1">Custom Item Name</label>
+                                <input type="text" id="custom-item-name" placeholder="e.g. Special Secret Roll" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white">
+                            </div>
+                            <div class="w-full md:w-36">
+                                <label class="block text-xs font-medium text-slate-400 mb-1">Default Price ($)</label>
+                                <input type="number" step="0.01" id="custom-item-price" placeholder="8.50" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white">
+                            </div>
+                            <button type="button" onclick="addCustomItem()" class="w-full md:w-auto bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+                                <i class="fa-solid fa-plus mr-1"></i> Add Custom Item
+                            </button>
+                        </div>
+
+                        <!-- Dynamic Menu Checklist Grid -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-semibold text-sm text-slate-300 uppercase tracking-wider">Menu Checklist & Quantities</h4>
+                                <span id="live-feast-value" class="text-sm font-bold text-emerald-400">Total Calculated Value: $0.00</span>
+                            </div>
+                            <div id="logger-items-container" class="space-y-6 max-h-[500px] overflow-y-auto pr-2">
+                                <!-- Grouped sections generated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Save Session Button -->
+                        <div class="pt-4 border-t border-slate-800 flex justify-end">
+                            <button onclick="saveFeastLog()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Save Feast Log</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MARKET RATES VIEW -->
+                <div id="view-market" class="hidden space-y-6 max-w-6xl mx-auto">
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Daily Market Pricing</h3>
+                                <p class="text-xs text-slate-400">Manage individual item baseline prices across different dates</p>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-400 mb-1">Target Date for Rates</label>
+                                    <input type="date" id="market-rate-date" onchange="renderMarketRates()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Rates Category Filter -->
+                        <div class="flex space-x-2 border-b border-slate-800 pb-4">
+                            <button onclick="setMarketCategory('Shabuya')" id="market-tab-Shabuya" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors bg-rose-600 text-white">Shabuya</button>
+                            <button onclick="setMarketCategory('X-Fish')" id="market-tab-X-Fish" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900">X-Fish Izakaya</button>
+                            <button onclick="setMarketCategory('KBBQ')" id="market-tab-KBBQ" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900">KBBQ</button>
+                        </div>
+
+                        <!-- Market Rates Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                        <th class="p-4">Item Name</th>
+                                        <th class="p-4">Subcategory</th>
+                                        <th class="p-4">Daily Market Price ($)</th>
+                                        <th class="p-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="market-table-body" class="divide-y divide-slate-800 text-sm">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+        <!-- ================= NOTIFICATION MODAL ================= -->
+        <div id="notification-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+                <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center text-2xl border border-emerald-500/20">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h4 id="modal-title" class="font-bold text-lg text-white">Success</h4>
+                <p id="modal-message" class="text-sm text-slate-300">Operation completed successfully.</p>
+                <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-xl transition-colors">OK</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- COMPLETE MENU STRUCTURE DATA ---
+        const RESTAURANT_MENUS = {
+            "Shabuya": {
+                "Soups & Broths": [
+                    { name: "Original House Broth", defaultPrice: 6.99 },
+                    { name: "Miso Broth", defaultPrice: 6.99 },
+                    { name: "Spicy Miso Broth", defaultPrice: 7.99 },
+                    { name: "Tonkotsu Broth", defaultPrice: 8.99 },
+                    { name: "Sukiyaki Broth", defaultPrice: 7.99 }
+                ],
+                "Appetizers & Sides": [
+                    { name: "Pork Gyoza (Fried/Steamed)", defaultPrice: 6.50 },
+                    { name: "Chicken Karaage", defaultPrice: 7.50 },
+                    { name: "Takoyaki", defaultPrice: 7.00 },
+                    { name: "Edamame / Spicy Garlic Edamame", defaultPrice: 5.00 },
+                    { name: "Vegetable Spring Rolls", defaultPrice: 5.50 }
+                ],
+                "Meats & Proteins": [
+                    { name: "Prime Cross Rib", defaultPrice: 12.99 },
+                    { name: "Prime Blade Meat", defaultPrice: 13.99 },
+                    { name: "Wagyu Sirloin Tip", defaultPrice: 18.99 },
+                    { name: "Beef Toro (Short Plate)", defaultPrice: 11.99 },
+                    { name: "Prime Flat Iron Steak", defaultPrice: 14.99 },
+                    { name: "Natural Chicken Thigh", defaultPrice: 8.99 },
+                    { name: "Pork Belly", defaultPrice: 9.99 },
+                    { name: "Pork Shoulder", defaultPrice: 9.50 }
+                ],
+                "Vegetables & Bar": [
+                    { name: "Assorted Mushroom Basket", defaultPrice: 6.00 },
+                    { name: "Napa Cabbage & Greens", defaultPrice: 4.50 },
+                    { name: "Tofu & Fish Cakes", defaultPrice: 5.00 },
+                    { name: "Ramen / Udon Noodles (Serving)", defaultPrice: 4.00 }
+                ]
+            },
+            "X-Fish": {
+                "Lunch Sushi Bar (Nigiri/Sashimi)": [
+                    { name: "Maguro (Tuna) Nigiri (2pc)", defaultPrice: 6.50 },
+                    { name: "Sake (Salmon) Nigiri (2pc)", defaultPrice: 6.00 },
+                    { name: "Hamachi (Yellowtail) Nigiri (2pc)", defaultPrice: 7.00 },
+                    { name: "Unagi (Eel) Nigiri (2pc)", defaultPrice: 7.50 },
+                    { name: "Ebi (Shrimp) Nigiri (2pc)", defaultPrice: 5.50 },
+                    { name: "Masago (Smelt Egg) Nigiri", defaultPrice: 6.00 }
+                ],
+                "Roll Bar (Specialty & Fried)": [
+                    { name: "Crunch Roll", defaultPrice: 12.99 },
+                    { name: "Dragon Roll", defaultPrice: 15.99 },
+                    { name: "Rainbow Roll", defaultPrice: 14.99 },
+                    { name: "Philadelphia Roll", defaultPrice: 11.99 },
+                    { name: "Spicy Tuna Crispy Rice", defaultPrice: 13.50 },
+                    { name: "Deep Fried Las Vegas Roll", defaultPrice: 14.00 }
+                ],
+                "Skewers & Hot Kitchen": [
+                    { name: "Jidori Momo Skewer (Chicken)", defaultPrice: 5.50 },
+                    { name: "Kawa Skin Skewer", defaultPrice: 5.00 },
+                    { name: "Negima Momo Skewer", defaultPrice: 5.50 },
+                    { name: "Bacon Asparagus Skewer", defaultPrice: 6.00 },
+                    { name: "Pork Gyoza (X-Fish)", defaultPrice: 6.50 }
+                ],
+                "Noodles & Soup": [
+                    { name: "Tonkotsu Ramen Bowl", defaultPrice: 14.99 },
+                    { name: "Seafood Udon Soup", defaultPrice: 13.99 },
+                    { name: "Miso Soup Bowl", defaultPrice: 3.50 }
+                ]
+            },
+            "KBBQ": {
+                "Marinated Meats": [
+                    { name: "Galbi (Prime Beef Short Rib)", defaultPrice: 16.99 },
+                    { name: "Bulgogi (Marinated Ribeye)", defaultPrice: 13.99 },
+                    { name: "Jumulleok (Seasoned Sirloin)", defaultPrice: 14.99 }
+                ],
+                "Unmarinated Meats": [
+                    { name: "Woo Samgyup (Thin Brisket)", defaultPrice: 12.99 },
+                    { name: "Samgyupsal (Pork Belly)", defaultPrice: 11.99 },
+                    { name: "Daeji Bulgogi (Spicy Pork)", defaultPrice: 10.99 }
+                ],
+                "Sides & Banchan": [
+                    { name: "Steamed Egg Souffle (Gyeran-jjim)", defaultPrice: 7.00 },
+                    { name: "Kimchi Stew (Kimchi-jjigae)", defaultPrice: 9.99 },
+                    { name: "Corn Cheese", defaultPrice: 6.50 },
+                    { name: "Assorted Banchan Refill", defaultPrice: 5.00 }
+                ]
+            }
+        };
+
+        // --- LOCAL STORAGE STATE ---
+        let appState = {
+            currentUser: null,
+            users: {}, // username -> { logs: [], customPrices: { 'YYYY-MM-DD': { 'Item Name': price } }, customItems: [] }
+        };
+
+        let currentActiveTab = 'dashboard';
+        let marketCategoryTab = 'Shabuya';
+        let activeLoggerQuantities = {}; // itemName -> count
+
+        // Initialize App on Load
+        window.onload = function() {
+            loadFromStorage();
+            const savedUser = localStorage.getItem('ayce_current_user');
+            if (savedUser && appState.users[savedUser]) {
+                appState.currentUser = savedUser;
+                document.getElementById('display-username').innerText = savedUser;
+                showMainApp();
+            } else {
+                showAuthView();
+            }
+
+            // Set default date inputs to today
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('log-date').value = todayStr;
+            document.getElementById('market-rate-date').value = todayStr;
+        };
+
+        function loadFromStorage() {
+            const raw = localStorage.getItem('ayce_app_state');
+            if (raw) {
+                try {
+                    appState = JSON.parse(raw);
+                } catch(e) {
+                    console.error("Error parsing storage", e);
+                }
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('ayce_app_state', JSON.stringify(appState));
+        }
+
+        // --- AUTHENTICATION ---
+        function handleAuth(e) {
+            e.preventDefault();
+            const user = document.getElementById('auth-username').value.trim();
+            const pass = document.getElementById('auth-password').value.trim();
+            if (!user || !pass) return;
+
+            if (!appState.users[user]) {
+                appState.users[user] = {
+                    password: pass,
+                    logs: [],
+                    customPrices: {},
+                    customItems: []
+                };
+            } else if (appState.users[user].password !== pass) {
+                showModal("Authentication Error", "Incorrect password for existing user.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                return;
+            }
+
+            appState.currentUser = user;
+            localStorage.setItem('ayce_current_user', user);
+            saveToStorage();
+
+            document.getElementById('display-username').innerText = user;
+            showMainApp();
+        }
+
+        function handleLogout() {
+            appState.currentUser = null;
+            localStorage.removeItem('ayce_current_user');
+            showAuthView();
+        }
+
+        function showAuthView() {
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-view').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            switchTab('dashboard');
+            refreshDashboard();
+        }
+
+        // --- NAVIGATION ---
+        function switchTab(tabId) {
+            currentActiveTab = tabId;
+            ['dashboard', 'logger', 'market'].forEach(t => {
+                const el = document.getElementById('view-' + t);
+                const nav = document.getElementById('nav-' + t);
+                if (t === tabId) {
+                    if(el) el.classList.remove('hidden');
+                    if(nav) {
+                        nav.className = "px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-rose-600 text-white shadow-md shadow-rose-600/25";
+                    }
+                } else {
+                    if(el) el.classList.add('hidden');
+                    if(nav) {
+                        nav.className = "px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800";
+                    }
+                }
+            });
+
+            if (tabId === 'dashboard') refreshDashboard();
+            if (tabId === 'logger') initLoggerForm();
+            if (tabId === 'market') renderMarketRates();
+        }
+
+        // --- MARKET PRICING HELPER ---
+        function getItemPriceForDate(category, itemName, dateStr) {
+            const userData = appState.users[appState.currentUser];
+            if (userData && userData.customPrices && userData.customPrices[dateStr] && userData.customPrices[dateStr][itemName] !== undefined) {
+                return userData.customPrices[dateStr][itemName];
+            }
+            // Fallback to default
+            if (RESTAURANT_MENUS[category]) {
+                for (let sub in RESTAURANT_MENUS[category]) {
+                    const found = RESTAURANT_MENUS[category][sub].find(i => i.name === itemName);
+                    if (found) return found.defaultPrice;
+                }
+            }
+            if (userData && userData.customItems) {
+                const cFound = userData.customItems.find(i => i.name === itemName);
+                if (cFound) return cFound.defaultPrice;
+            }
+            return 5.00; // default fallback
+        }
+
+        // --- LOGGER LOGIC ---
+        function initLoggerForm() {
+            activeLoggerQuantities = {};
+            renderLoggerItems();
+            updateLiveFeastValue();
+        }
+
+        function onCategoryChange() {
+            activeLoggerQuantities = {};
+            renderLoggerItems();
+            updateLiveFeastValue();
+        }
+
+        function renderLoggerItems() {
+            const cat = document.getElementById('log-category').value;
+            const container = document.getElementById('logger-items-container');
+            container.innerHTML = '';
+
+            const menu = RESTAURANT_MENUS[cat] || {};
+            const dateStr = document.getElementById('log-date').value || new Date().toISOString().split('T')[0];
+            const userData = appState.users[appState.currentUser];
+
+            // Render standard menu categories
+            for (let subcat in menu) {
+                let html = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <h5 class="font-semibold text-rose-400 text-xs uppercase tracking-wider">${subcat}</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+
+                menu[subcat].forEach(item => {
+                    const price = getItemPriceForDate(cat, item.name, dateStr);
+                    const qty = activeLoggerQuantities[item.name] || 0;
+                    html += `
+                        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                            <div>
+                                <p class="text-sm font-medium text-white">${item.name}</p>
+                                <p class="text-xs text-slate-400">$${price.toFixed(2)} / unit</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
+                                <span id="qty-${item.name}" class="w-8 text-center text-sm font-bold text-white">${qty}</span>
+                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            }
+
+            // Render custom items if any
+            if (userData && userData.customItems && userData.customItems.length > 0) {
+                let html = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <h5 class="font-semibold text-amber-400 text-xs uppercase tracking-wider">Custom Feasts Items</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
+
+                userData.customItems.forEach(item => {
+                    const price = getItemPriceForDate(cat, item.name, dateStr);
+                    const qty = activeLoggerQuantities[item.name] || 0;
+                    html += `
+                        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                            <div>
+                                <p class="text-sm font-medium text-white">${item.name}</p>
+                                <p class="text-xs text-slate-400">$${price.toFixed(2)} / unit</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
+                                <span id="qty-${item.name}" class="w-8 text-center text-sm font-bold text-white">${qty}</span>
+                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        function adjustQty(itemName, delta) {
+            const current = activeLoggerQuantities[itemName] || 0;
+            const updated = Math.max(0, current + delta);
+            activeLoggerQuantities[itemName] = updated;
+            
+            const badge = document.getElementById('qty-' + itemName);
+            if (badge) badge.innerText = updated;
+
+            updateLiveFeastValue();
+        }
+
+        function updateLiveFeastValue() {
+            const cat = document.getElementById('log-category').value;
+            const dateStr = document.getElementById('log-date').value || new Date().toISOString().split('T')[0];
+            let total = 0;
+
+            for (let itemName in activeLoggerQuantities) {
+                const qty = activeLoggerQuantities[itemName];
+                if (qty > 0) {
+                    const price = getItemPriceForDate(cat, itemName, dateStr);
+                    total += price * qty;
+                }
+            }
+
+            document.getElementById('live-feast-value').innerText = `Total Calculated Value: $${total.toFixed(2)}`;
+        }
+
+        function addCustomItem() {
+            const nameInput = document.getElementById('custom-item-name');
+            const priceInput = document.getElementById('custom-item-price');
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value);
+
+            if (!name || isNaN(price) || price < 0) {
+                showModal("Invalid Input", "Please provide a valid item name and price.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                return;
+            }
+
+            const userData = appState.users[appState.currentUser];
+            if (!userData.customItems) userData.customItems = [];
+            userData.customItems.push({ name, defaultPrice: price });
+            saveToStorage();
+
+            nameInput.value = '';
+            priceInput.value = '';
+
+            renderLoggerItems();
+            showModal("Success", "Custom item added successfully!", "fa-solid fa-check", "text-emerald-400");
+        }
+
+        function saveFeastLog() {
+            const cat = document.getElementById('log-category').value;
+            const dateStr = document.getElementById('log-date').value;
+            const ticketPrice = parseFloat(document.getElementById('log-ticket-price').value);
+
+            if (!dateStr || isNaN(ticketPrice) || ticketPrice < 0) {
+                showModal("Error", "Please provide a valid date and ticket price.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                return;
+            }
+
+            // Capture locked historical market prices for each item consumed
+            const itemsConsumed = {};
+            let totalMarketValue = 0;
+
+            for (let itemName in activeLoggerQuantities) {
+                const qty = activeLoggerQuantities[itemName];
+                if (qty > 0) {
+                    const historicalPrice = getItemPriceForDate(cat, itemName, dateStr);
+                    itemsConsumed[itemName] = {
+                        qty: qty,
+                        historicalPrice: historicalPrice
+                    };
+                    totalMarketValue += historicalPrice * qty;
+                }
+            }
+
+            if (Object.keys(itemsConsumed).length === 0) {
+                showModal("Warning", "You haven't logged any food items consumed for this feast.", "fa-solid fa-triangle-exclamation", "text-amber-500");
+                return;
+            }
+
+            const profit = totalMarketValue - ticketPrice;
+
+            const newLog = {
+                id: 'log_' + Date.now(),
+                category: cat,
+                date: dateStr,
+                ticketPrice: ticketPrice,
+                totalMarketValue: totalMarketValue,
+                profit: profit,
+                items: itemsConsumed
+            };
+
+            const userData = appState.users[appState.currentUser];
+            if (!userData.logs) userData.logs = [];
+            userData.logs.unshift(newLog); // newest first
+            saveToStorage();
+
+            showModal("Feast Saved!", `Successfully logged feast! Market Value: $${totalMarketValue.toFixed(2)} | Profit: $${profit.toFixed(2)}`, "fa-solid fa-utensils", "text-emerald-400");
+            switchTab('dashboard');
+        }
+
+        // --- DASHBOARD RENDERING ---
+        function refreshDashboard() {
+            const userData = appState.users[appState.currentUser];
+            const logs = userData && userData.logs ? userData.logs : [];
+
+            let totalProfit = 0;
+            let totalSpent = 0;
+
+            logs.forEach(l => {
+                totalProfit += l.profit;
+                totalSpent += l.ticketPrice;
+            });
+
+            document.getElementById('stat-total-profit').innerText = `$${totalProfit.toFixed(2)}`;
+            document.getElementById('stat-net-savings').innerText = `$${totalProfit.toFixed(2)}`;
+            document.getElementById('stat-total-spent').innerText = `$${totalSpent.toFixed(2)}`;
+            document.getElementById('stat-total-sessions').innerText = logs.length;
+
+            const tbody = document.getElementById('history-table-body');
+            tbody.innerHTML = '';
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">No feast logs recorded yet. Click "New Session" to start tracking!</td></tr>`;
+                return;
+            }
+
+            logs.forEach(l => {
+                const isProfitPositive = l.profit >= 0;
+                const profitClass = isProfitPositive ? 'text-emerald-400' : 'text-rose-400';
+                const profitIcon = isProfitPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+
+                let itemsDetail = '<ul class="text-xs text-slate-400 space-y-1 mt-2">';
+                for (let k in l.items) {
+                    itemsDetail += `<li>• ${k} x${l.items[k].qty} ($${l.items[k].historicalPrice.toFixed(2)} ea)</li>`;
+                }
+                itemsDetail += '</ul>';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 transition-colors">
+                        <td class="p-4 font-medium text-white">${l.date}</td>
+                        <td class="p-4"><span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-xs font-semibold">${l.category}</span></td>
+                        <td class="p-4 text-slate-300">$${l.ticketPrice.toFixed(2)}</td>
+                        <td class="p-4 text-slate-300">$${l.totalMarketValue.toFixed(2)} ${itemsDetail}</td>
+                        <td class="p-4 font-bold ${profitClass}"><i class="fa-solid ${profitIcon} mr-1"></i> $${l.profit.toFixed(2)}</td>
+                        <td class="p-4 text-right">
+                            <button onclick="deleteLog('${l.id}')" class="p-2 text-slate-500 hover:text-rose-400 transition-colors rounded-lg hover:bg-slate-800" title="Delete Log">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function deleteLog(logId) {
+            const userData = appState.users[appState.currentUser];
+            if (userData && userData.logs) {
+                userData.logs = userData.logs.filter(l => l.id !== logId);
+                saveToStorage();
+                refreshDashboard();
+            }
+        }
+
+        // --- MARKET RATES TAB ---
+        function setMarketCategory(cat) {
+            marketCategoryTab = cat;
+            ['Shabuya', 'X-Fish', 'KBBQ'].forEach(c => {
+                const btn = document.getElementById('market-tab-' + c);
+                if (c === cat) {
+                    btn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors bg-rose-600 text-white";
+                } else {
+                    btn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900";
+                }
+            });
+            renderMarketRates();
+        }
+
+        function renderMarketRates() {
+            const dateStr = document.getElementById('market-rate-date').value || new Date().toISOString().split('T')[0];
+            const tbody = document.getElementById('market-table-body');
+            tbody.innerHTML = '';
+
+            const menu = RESTAURANT_MENUS[marketCategoryTab] || {};
+            const userData = appState.users[appState.currentUser];
+
+            for (let subcat in menu) {
+                menu[subcat].forEach(item => {
+                    const currentPrice = getItemPriceForDate(marketCategoryTab, item.name, dateStr);
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 font-medium text-white">${item.name}</td>
+                            <td class="p-4 text-xs text-slate-400">${subcat}</td>
+                            <td class="p-4">
+                                <div class="flex items-center space-x-2 max-w-xs">
+                                    <span class="text-slate-500">$</span>
+                                    <input type="number" step="0.01" id="price-input-${sanitizeId(item.name)}" value="${currentPrice.toFixed(2)}"
+                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-rose-500">
+                                </div>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                                    Update Rate
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Also render custom items if in their category context
+            if (userData && userData.customItems) {
+                userData.customItems.forEach(item => {
+                    const currentPrice = getItemPriceForDate(marketCategoryTab, item.name, dateStr);
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 font-medium text-amber-400">${item.name} <span class="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded ml-2">Custom</span></td>
+                            <td class="p-4 text-xs text-slate-400">Custom Items</td>
+                            <td class="p-4">
+                                <div class="flex items-center space-x-2 max-w-xs">
+                                    <span class="text-slate-500">$</span>
+                                    <input type="number" step="0.01" id="price-input-${sanitizeId(item.name)}" value="${currentPrice.toFixed(2)}"
+                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-rose-500">
+                                </div>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                                    Update Rate
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function saveMarketPrice(cat, itemName, dateStr) {
+            const inputEl = document.getElementById('price-input-' + sanitizeId(itemName));
+            if (!inputEl) return;
+            const newPrice = parseFloat(inputEl.value);
+            if (isNaN(newPrice) || newPrice < 0) {
+                showModal("Invalid Price", "Please provide a valid market price.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                return;
+            }
+
+            const userData = appState.users[appState.currentUser];
+            if (!userData.customPrices) userData.customPrices = {};
+            if (!userData.customPrices[dateStr]) userData.customPrices[dateStr] = {};
+
+            userData.customPrices[dateStr][itemName] = newPrice;
+            saveToStorage();
+
+            showModal("Rate Updated", `Market rate for ${itemName} on ${dateStr} updated to $${newPrice.toFixed(2)}.`, "fa-solid fa-check", "text-emerald-400");
+        }
+
+        function sanitizeId(name) {
+            return name.replace(/[^a-zA-Z0-9]/g, '_');
+        }
+
+        // --- MODAL UTILS ---
+        function showModal(title, message, iconClass, iconColorClass) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            const iconContainer = document.getElementById('modal-icon');
+            iconContainer.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl border ${iconColorClass} bg-slate-950`;
+            iconContainer.innerHTML = `<i class="${iconClass}"></i>`;
+            document.getElementById('notification-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('notification-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
