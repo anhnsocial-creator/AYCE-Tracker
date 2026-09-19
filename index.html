@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full dark" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,27 +23,26 @@
         }
     </script>
     <style>
-        /* Custom scrollbar styling for slick UI */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.8); }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 h-full font-sans antialiased selection:bg-rose-500 selection:text-white">
+<body class="bg-slate-900 text-slate-100 dark:bg-slate-900 dark:text-slate-100 h-full font-sans antialiased transition-colors duration-200">
 
     <div id="app" class="min-h-full flex flex-col">
         
         <div id="main-app" class="flex-1 flex flex-col h-full overflow-hidden">
             
-            <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+            <header class="bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shrink-0 transition-colors duration-200">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
+                    <div id="brand-icon-box" class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
                         <i class="fa-solid fa-fire text-lg"></i>
                     </div>
                     <div>
-                        <h2 class="font-bold text-white tracking-tight text-lg">AYCE Profit Tracker</h2>
-                        <p class="text-xs text-slate-400">Account Status: <span id="display-username" class="text-rose-400 font-semibold">Guest Session</span></p>
+                        <h2 class="font-bold text-slate-900 dark:text-white tracking-tight text-lg">AYCE Profit Tracker</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Account Status: <span id="display-username" class="text-rose-600 dark:text-rose-400 font-semibold">Guest Session</span></p>
                     </div>
                 </div>
 
@@ -51,96 +50,169 @@
                     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-rose-600 text-white shadow-md shadow-rose-600/20">
                         <i class="fa-solid fa-chart-pie mr-2"></i>Dashboard
                     </button>
-                    <button onclick="switchTab('logger')" id="nav-logger" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800">
+                    <button onclick="switchTab('logger')" id="nav-logger" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
                         <i class="fa-solid fa-plus-circle mr-2"></i>New Session
                     </button>
-                    <button onclick="switchTab('market')" id="nav-market" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800">
+                    <button onclick="switchTab('market')" id="nav-market" class="px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
                         <i class="fa-solid fa-tags mr-2"></i>Market Rates
                     </button>
+
+                    <!-- Settings Dropdown Button -->
+                    <div class="relative">
+                        <button onclick="toggleSettingsDropdown()" class="p-2.5 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-800" title="Settings">
+                            <i class="fa-solid fa-gear text-base"></i>
+                        </button>
+                        
+                        <!-- Dropdown Content -->
+                        <div id="settings-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-4 z-50 space-y-4">
+                            <div class="border-b border-slate-200 dark:border-slate-800 pb-3 flex items-center justify-between">
+                                <h4 class="font-bold text-sm text-slate-900 dark:text-white">App Settings</h4>
+                                <button onclick="toggleSettingsDropdown()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+
+                            <!-- Appearance: Dark / Light Mode -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Appearance Mode</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="setDarkMode(false)" id="mode-light-btn" class="flex items-center justify-center space-x-2 py-2 px-3 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                        <i class="fa-solid fa-sun text-amber-500"></i><span>Light</span>
+                                    </button>
+                                    <button onclick="setDarkMode(true)" id="mode-dark-btn" class="flex items-center justify-center space-x-2 py-2 px-3 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+                                        <i class="fa-solid fa-moon text-indigo-400"></i><span>Dark</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Theme Presets (13 Themes) -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Color Theme (13 Presets)</label>
+                                <select id="theme-selector" onchange="changeTheme(this.value)" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none">
+                                    <option value="rose">Rose (Default)</option>
+                                    <option value="emerald">Emerald Green</option>
+                                    <option value="indigo">Indigo Blue</option>
+                                    <option value="amber">Amber Gold</option>
+                                    <option value="cyan">Cyan Electric</option>
+                                    <option value="violet">Violet Glow</option>
+                                    <option value="fuchsia">Fuchsia Pink</option>
+                                    <option value="sky">Sky Blue</option>
+                                    <option value="teal">Teal Splash</option>
+                                    <option value="lime">Lime Fresh</option>
+                                    <option value="orange">Sunset Orange</option>
+                                    <option value="purple">Royal Purple</option>
+                                    <option value="slate">Monochrome Slate</option>
+                                </select>
+                            </div>
+
+                            <!-- Account Credentials Update (Visible if logged in) -->
+                            <div id="settings-account-section" class="border-t border-slate-200 dark:border-slate-800 pt-3 space-y-3">
+                                <h4 class="font-bold text-xs text-slate-900 dark:text-white uppercase tracking-wider">Account Settings</h4>
+                                <div id="settings-guest-notice" class="text-xs text-slate-500 dark:text-slate-400 italic">
+                                    Log in to edit username, password, or add email.
+                                </div>
+                                <div id="settings-user-fields" class="space-y-2 hidden">
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-slate-500 dark:text-slate-400 mb-1">Update Username</label>
+                                        <input type="text" id="settings-input-username" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-slate-500 dark:text-slate-400 mb-1">Add / Update Email</label>
+                                        <input type="email" id="settings-input-email" placeholder="foodie@example.com" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] uppercase text-slate-500 dark:text-slate-400 mb-1">New Password</label>
+                                        <input type="password" id="settings-input-password" placeholder="Leave blank to keep current" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-900 dark:text-white">
+                                    </div>
+                                    <button onclick="saveAccountSettings()" class="w-full py-2 rounded-xl text-xs font-semibold text-white bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Auth Action Buttons (Visible for Guests) -->
-                    <div id="auth-buttons-container" class="flex items-center space-x-2 pl-2 border-l border-slate-800">
-                        <button onclick="openAuthModal('login')" class="px-3 py-2 rounded-xl text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors">
+                    <div id="auth-buttons-container" class="flex items-center space-x-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                        <button onclick="openAuthModal('login')" class="px-3 py-2 rounded-xl text-sm font-medium bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
                             <i class="fa-solid fa-right-to-bracket mr-1.5"></i>Log In
                         </button>
-                        <button onclick="openAuthModal('signup')" class="px-3 py-2 rounded-xl text-sm font-medium bg-rose-600 hover:bg-rose-500 text-white transition-colors shadow-md shadow-rose-600/20">
+                        <button onclick="openAuthModal('signup')" id="primary-action-btn" class="px-3 py-2 rounded-xl text-sm font-medium bg-rose-600 hover:bg-rose-500 text-white transition-colors shadow-md shadow-rose-600/20">
                             <i class="fa-solid fa-user-plus mr-1.5"></i>Sign Up
                         </button>
                     </div>
 
                     <!-- User Logged Out Button (Hidden initially) -->
-                    <button id="logout-button" onclick="handleLogout()" class="hidden p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors ml-2" title="Sign Out">
+                    <button id="logout-button" onclick="handleLogout()" class="hidden p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-2" title="Sign Out">
                         <i class="fa-solid fa-right-from-bracket text-lg"></i>
                     </button>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6 bg-slate-900">
+            <main class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
                 
                 <!-- 1. DASHBOARD VIEW -->
                 <div id="view-dashboard" class="space-y-6 max-w-7xl mx-auto">
                     <!-- Metrics Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Profit Made</span>
-                                <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm"><i class="fa-solid fa-chart-line"></i></span>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Profit Made</span>
+                                <span class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 flex items-center justify-center text-sm"><i class="fa-solid fa-chart-line"></i></span>
                             </div>
                             <div class="mt-3 flex items-baseline justify-between">
-                                <h3 id="stat-total-profit" class="text-3xl font-bold text-emerald-400">$0.00</h3>
-                                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-medium">Value Gained</span>
+                                <h3 id="stat-total-profit" class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">$0.00</h3>
+                                <span class="text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-medium">Value Gained</span>
                             </div>
                         </div>
 
-                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Net Savings</span>
-                                <span class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm"><i class="fa-solid fa-piggy-bank"></i></span>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Net Savings</span>
+                                <span class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400 flex items-center justify-center text-sm"><i class="fa-solid fa-piggy-bank"></i></span>
                             </div>
                             <div class="mt-3 flex items-baseline justify-between">
-                                <h3 id="stat-net-savings" class="text-3xl font-bold text-indigo-400">$0.00</h3>
-                                <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-medium">Overall</span>
+                                <h3 id="stat-net-savings" class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">$0.00</h3>
+                                <span class="text-xs text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-medium">Overall</span>
                             </div>
                         </div>
 
-                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Spent (Tickets)</span>
-                                <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center text-sm"><i class="fa-solid fa-receipt"></i></span>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Spent (Tickets)</span>
+                                <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-500 dark:text-rose-400 flex items-center justify-center text-sm"><i class="fa-solid fa-receipt"></i></span>
                             </div>
                             <div class="mt-3 flex items-baseline justify-between">
-                                <h3 id="stat-total-spent" class="text-3xl font-bold text-white">$0.00</h3>
-                                <span class="text-xs text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full font-medium">Cost</span>
+                                <h3 id="stat-total-spent" class="text-3xl font-bold text-slate-900 dark:text-white">$0.00</h3>
+                                <span class="text-xs text-rose-500 dark:text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full font-medium">Cost</span>
                             </div>
                         </div>
 
-                        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg relative overflow-hidden">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Sessions</span>
-                                <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm"><i class="fa-solid fa-calendar-check"></i></span>
+                                <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Sessions</span>
+                                <span class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 dark:text-amber-400 flex items-center justify-center text-sm"><i class="fa-solid fa-calendar-check"></i></span>
                             </div>
                             <div class="mt-3 flex items-baseline justify-between">
-                                <h3 id="stat-total-sessions" class="text-3xl font-bold text-white">0</h3>
-                                <span class="text-xs text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-medium">Feasts Logged</span>
+                                <h3 id="stat-total-sessions" class="text-3xl font-bold text-slate-900 dark:text-white">0</h3>
+                                <span class="text-xs text-amber-500 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full font-medium">Feasts Logged</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- History Table Section -->
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
-                        <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                    <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg overflow-hidden">
+                        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <h3 class="font-bold text-lg text-white">Feast History</h3>
-                                <p class="text-xs text-slate-400">Review past AYCE sessions and locked historical values</p>
+                                <h3 class="font-bold text-lg text-slate-900 dark:text-white">Feast History</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Review past AYCE sessions and locked historical values</p>
                             </div>
-                            <button onclick="switchTab('logger')" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-rose-600/20">
+                            <button onclick="switchTab('logger')" id="history-new-feast-btn" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-md shadow-rose-600/20">
                                 <i class="fa-solid fa-plus mr-2"></i>Log New Feast
                             </button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
                                         <th class="p-4">Date</th>
                                         <th class="p-4">Category</th>
                                         <th class="p-4">Ticket Cost</th>
@@ -149,7 +221,7 @@
                                         <th class="p-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="history-table-body" class="divide-y divide-slate-800 text-sm">
+                                <tbody id="history-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
                                     <!-- Populated dynamically -->
                                 </tbody>
                             </table>
@@ -159,43 +231,46 @@
 
                 <!-- 2. LOGGER VIEW -->
                 <div id="view-logger" class="hidden space-y-6 max-w-5xl mx-auto">
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
-                        <div class="border-b border-slate-800 pb-4">
-                            <h3 class="text-xl font-bold text-white">New AYCE Feast Logger</h3>
-                            <p class="text-xs text-slate-400">Select restaurant, date, ticket price, and tally your dishes</p>
+                    <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                        <div class="border-b border-slate-200 dark:border-slate-800 pb-4 flex items-center justify-between">
+                            <div>
+                                <h3 id="logger-title-heading" class="text-xl font-bold text-slate-900 dark:text-white">New AYCE Feast Logger</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Select restaurant, date, ticket price, and tally your dishes</p>
+                            </div>
+                            <button id="cancel-edit-btn" onclick="cancelEditFeast()" class="hidden text-xs text-rose-600 dark:text-rose-400 hover:underline"><i class="fa-solid fa-xmark mr-1"></i>Cancel Editing</button>
                         </div>
 
                         <!-- Session Configuration Header -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Category / Restaurant</label>
-                                <select id="log-category" onchange="onCategoryChange()" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Category / Restaurant</label>
+                                <select id="log-category" onchange="onCategoryChange()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none">
                                     <option value="Shabuya">Shabuya (Hot Pot)</option>
                                     <option value="X-Fish">X-Fish Izakaya (Sushi & Rolls)</option>
                                     <option value="KBBQ">KBBQ (Korean BBQ)</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Date</label>
-                                <input type="date" id="log-date" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Date</label>
+                                <input type="date" id="log-date" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none">
                             </div>
                             <div>
-                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Flat Ticket Price ($)</label>
-                                <input type="number" step="0.01" id="log-ticket-price" placeholder="32.99" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500">
+                                <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Flat Ticket Price ($)</label>
+                                <input type="number" step="0.01" id="log-ticket-price" placeholder="32.99" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none">
                             </div>
                         </div>
 
                         <!-- Custom Item Creator -->
-                        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row gap-3 items-end">
+                        <div class="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row gap-3 items-end">
                             <div class="flex-1 w-full">
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Custom Item Name</label>
-                                <input type="text" id="custom-item-name" placeholder="e.g. Special Secret Roll" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white">
+                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Custom Item Name</label>
+                                <input type="text" id="custom-item-name" placeholder="e.g. Special Secret Roll" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white">
                             </div>
                             <div class="w-full md:w-36">
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Default Price ($)</label>
-                                <input type="number" step="0.01" id="custom-item-price" placeholder="8.50" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white">
+                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Default Price ($)</label>
+                                <input type="number" step="0.01" id="custom-item-price" placeholder="8.50" class="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white">
                             </div>
-                            <button type="button" onclick="addCustomItem()" class="w-full md:w-auto bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+                            <button type="button" onclick="addCustomItem()" class="w-full md:w-auto bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
                                 <i class="fa-solid fa-plus mr-1"></i> Add Custom Item
                             </button>
                         </div>
@@ -203,8 +278,8 @@
                         <!-- Dynamic Menu Checklist Grid -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                                <h4 class="font-semibold text-sm text-slate-300 uppercase tracking-wider">Menu Checklist & Quantities</h4>
-                                <span id="live-feast-value" class="text-sm font-bold text-emerald-400">Total Calculated Value: $0.00</span>
+                                <h4 class="font-semibold text-sm text-slate-700 dark:text-slate-300 uppercase tracking-wider">Menu Checklist & Quantities</h4>
+                                <span id="live-feast-value" class="text-sm font-bold text-emerald-600 dark:text-emerald-400">Total Calculated Value: $0.00</span>
                             </div>
                             <div id="logger-items-container" class="space-y-6 max-h-[500px] overflow-y-auto pr-2">
                                 <!-- Grouped sections generated dynamically -->
@@ -212,10 +287,10 @@
                         </div>
 
                         <!-- Save Session Button -->
-                        <div class="pt-4 border-t border-slate-800 flex justify-end">
-                            <button onclick="saveFeastLog()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
+                        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                            <button id="save-feast-btn" onclick="saveFeastLog()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-8 py-3 rounded-xl transition-all shadow-lg shadow-emerald-600/20 flex items-center space-x-2">
                                 <i class="fa-solid fa-floppy-disk"></i>
-                                <span>Save Feast Log</span>
+                                <span id="save-feast-btn-text">Save Feast Log</span>
                             </button>
                         </div>
                     </div>
@@ -223,39 +298,39 @@
 
                 <!-- 3. MARKET RATES VIEW -->
                 <div id="view-market" class="hidden space-y-6 max-w-6xl mx-auto">
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-lg space-y-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
                             <div>
-                                <h3 class="text-xl font-bold text-white">Daily Market Pricing</h3>
-                                <p class="text-xs text-slate-400">Manage individual item baseline prices across different dates</p>
+                                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Daily Market Pricing</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Manage individual item baseline prices across different dates</p>
                             </div>
                             <div class="flex items-center space-x-3">
                                 <div>
-                                    <label class="block text-xs font-medium text-slate-400 mb-1">Target Date for Rates</label>
-                                    <input type="date" id="market-rate-date" onchange="renderMarketRates()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500">
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Target Date for Rates</label>
+                                    <input type="date" id="market-rate-date" onchange="renderMarketRates()" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none">
                                 </div>
                             </div>
                         </div>
 
                         <!-- Market Rates Category Filter -->
-                        <div class="flex space-x-2 border-b border-slate-800 pb-4">
+                        <div class="flex space-x-2 border-b border-slate-200 dark:border-slate-800 pb-4">
                             <button onclick="setMarketCategory('Shabuya')" id="market-tab-Shabuya" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors bg-rose-600 text-white">Shabuya</button>
-                            <button onclick="setMarketCategory('X-Fish')" id="market-tab-X-Fish" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900">X-Fish Izakaya</button>
-                            <button onclick="setMarketCategory('KBBQ')" id="market-tab-KBBQ" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900">KBBQ</button>
+                            <button onclick="setMarketCategory('X-Fish')" id="market-tab-X-Fish" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">X-Fish Izakaya</button>
+                            <button onclick="setMarketCategory('KBBQ')" id="market-tab-KBBQ" class="px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900">KBBQ</button>
                         </div>
 
                         <!-- Market Rates Table -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr class="border-b border-slate-800 bg-slate-900/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                                    <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
                                         <th class="p-4">Item Name</th>
                                         <th class="p-4">Subcategory</th>
                                         <th class="p-4">Daily Market Price ($)</th>
                                         <th class="p-4 text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody id="market-table-body" class="divide-y divide-slate-800 text-sm">
+                                <tbody id="market-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
                                     <!-- Populated dynamically -->
                                 </tbody>
                             </table>
@@ -268,30 +343,30 @@
 
         <!-- ================= AUTHENTICATION MODAL ================= -->
         <div id="auth-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl relative">
-                <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-8 space-y-6 shadow-2xl relative">
+                <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
                 <div class="text-center space-y-2">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 mb-2 border border-rose-500/20">
+                    <div id="auth-icon-box" class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 mb-2 border border-rose-500/20">
                         <i id="auth-modal-icon" class="fa-solid fa-user-plus text-2xl"></i>
                     </div>
-                    <h3 id="auth-modal-title" class="text-2xl font-bold tracking-tight text-white">Create Account</h3>
-                    <p id="auth-modal-subtitle" class="text-sm text-slate-400">Save your AYCE profit logs across sessions</p>
+                    <h3 id="auth-modal-title" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Create Account</h3>
+                    <p id="auth-modal-subtitle" class="text-sm text-slate-500 dark:text-slate-400">Save your AYCE profit logs across sessions</p>
                 </div>
 
                 <form id="auth-form" class="space-y-4" onsubmit="handleAuthSubmit(event)">
                     <input type="hidden" id="auth-mode" value="signup">
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Username</label>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Username</label>
                         <input type="text" id="auth-username" required 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none transition-colors"
                             placeholder="e.g. FoodieKing">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Password</label>
+                        <label class="block text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Password</label>
                         <input type="password" id="auth-password" required 
-                            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-rose-500 transition-colors"
+                            class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none transition-colors"
                             placeholder="••••••••">
                     </div>
                     <button type="submit" id="auth-submit-btn"
@@ -301,10 +376,10 @@
                     </button>
                 </form>
 
-                <div class="text-center pt-2 border-t border-slate-800">
-                    <p id="auth-switch-text" class="text-xs text-slate-400">
+                <div class="text-center pt-2 border-t border-slate-200 dark:border-slate-800">
+                    <p id="auth-switch-text" class="text-xs text-slate-500 dark:text-slate-400">
                         Already have an account? 
-                        <button type="button" onclick="toggleAuthMode()" class="text-rose-400 font-semibold hover:underline ml-1">Log In</button>
+                        <button type="button" onclick="toggleAuthMode()" class="text-rose-600 dark:text-rose-400 font-semibold hover:underline ml-1">Log In</button>
                     </p>
                 </div>
             </div>
@@ -312,13 +387,13 @@
 
         <!-- ================= NOTIFICATION MODAL ================= -->
         <div id="notification-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
                 <div id="modal-icon" class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 mx-auto flex items-center justify-center text-2xl border border-emerald-500/20">
                     <i class="fa-solid fa-check"></i>
                 </div>
-                <h4 id="modal-title" class="font-bold text-lg text-white">Success</h4>
-                <p id="modal-message" class="text-sm text-slate-300">Operation completed successfully.</p>
-                <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-2.5 rounded-xl transition-colors">OK</button>
+                <h4 id="modal-title" class="font-bold text-lg text-slate-900 dark:text-white">Success</h4>
+                <p id="modal-message" class="text-sm text-slate-600 dark:text-slate-300">Operation completed successfully.</p>
+                <button onclick="closeModal()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-medium py-2.5 rounded-xl transition-colors">OK</button>
             </div>
         </div>
 
@@ -409,38 +484,59 @@
             }
         };
 
+        // --- THEME COLOR MAPPINGS (13 Themes) ---
+        const THEME_CONFIGS = {
+            rose: { primary: 'rose', hex: '#f43f5e' },
+            emerald: { primary: 'emerald', hex: '#10b981' },
+            indigo: { primary: 'indigo', hex: '#6366f1' },
+            amber: { primary: 'amber', hex: '#f59e0b' },
+            cyan: { primary: 'cyan', hex: '#06b6d4' },
+            violet: { primary: 'violet', hex: '#8b5cf6' },
+            fuchsia: { primary: 'fuchsia', hex: '#d946ef' },
+            sky: { primary: 'sky', hex: '#0ea5e9' },
+            teal: { primary: 'teal', hex: '#14b8a6' },
+            lime: { primary: 'lime', hex: '#84cc16' },
+            orange: { primary: 'orange', hex: '#f97316' },
+            purple: { primary: 'purple', hex: '#a855f7' },
+            slate: { primary: 'slate', hex: '#64748b' }
+        };
+
         // --- LOCAL STORAGE STATE ---
         let appState = {
-            currentUser: null, // null means Guest session
-            users: {}, // username -> { logs: [], customPrices: {}, customItems: [] }
+            currentUser: null,
+            users: {},
             guestData: {
                 logs: [],
                 customPrices: {},
                 customItems: []
-            }
+            },
+            theme: 'rose',
+            darkMode: true
         };
 
         let currentActiveTab = 'dashboard';
         let marketCategoryTab = 'Shabuya';
-        let activeLoggerQuantities = {}; // itemName -> count
+        let activeLoggerQuantities = {};
+        let editingFeastId = null;
 
         // Initialize App on Load
         window.onload = function() {
             loadFromStorage();
+            
+            // Apply theme and mode settings
+            applyTheme(appState.theme);
+            setDarkMode(appState.darkMode);
+            document.getElementById('theme-selector').value = appState.theme;
+
             const savedUser = localStorage.getItem('ayce_current_user');
             if (savedUser && appState.users[savedUser]) {
                 appState.currentUser = savedUser;
-                document.getElementById('display-username').innerText = savedUser;
-                document.getElementById('auth-buttons-container').classList.add('hidden');
-                document.getElementById('logout-button').classList.remove('hidden');
+                setupUserLoggedInUI(savedUser);
             } else {
                 appState.currentUser = null;
-                document.getElementById('display-username').innerText = 'Guest Session';
-                document.getElementById('auth-buttons-container').classList.remove('hidden');
-                document.getElementById('logout-button').classList.add('hidden');
+                setupGuestUI();
             }
 
-            // Set default date inputs to today
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('log-date').value = todayStr;
             document.getElementById('market-rate-date').value = todayStr;
@@ -455,6 +551,8 @@
                     const parsed = JSON.parse(raw);
                     appState.users = parsed.users || {};
                     appState.guestData = parsed.guestData || { logs: [], customPrices: {}, customItems: [] };
+                    if (parsed.theme) appState.theme = parsed.theme;
+                    if (parsed.darkMode !== undefined) appState.darkMode = parsed.darkMode;
                 } catch(e) {
                     console.error("Error parsing storage", e);
                 }
@@ -464,16 +562,110 @@
         function saveToStorage() {
             localStorage.setItem('ayce_app_state', JSON.stringify({
                 users: appState.users,
-                guestData: appState.guestData
+                guestData: appState.guestData,
+                theme: appState.theme,
+                darkMode: appState.darkMode
             }));
         }
 
-        // --- ACTIVE STORAGE STORE GETTER ---
         function getCurrentStore() {
             if (appState.currentUser && appState.users[appState.currentUser]) {
                 return appState.users[appState.currentUser];
             }
             return appState.guestData;
+        }
+
+        // --- THEME & APPEARANCE CONTROLS ---
+        function changeTheme(themeName) {
+            appState.theme = themeName;
+            saveToStorage();
+            applyTheme(themeName);
+        }
+
+        function applyTheme(themeName) {
+            // Update UI elements color styling classes dynamically
+            const primaryColor = THEME_CONFIGS[themeName] ? THEME_CONFIGS[themeName].primary : 'rose';
+            
+            // Update active tab buttons and primary buttons color
+            document.querySelectorAll('.bg-rose-600').forEach(el => {
+                el.className = el.className.replace(/bg-[a-z]+-600/g, `bg-${primaryColor}-600`);
+            });
+            document.querySelectorAll('.hover\\:bg-rose-500').forEach(el => {
+                el.className = el.className.replace(/hover\\:bg-[a-z]+-500/g, `hover:bg-${primaryColor}-500`);
+            });
+            document.querySelectorAll('.text-rose-600, .text-rose-500, .dark\\:text-rose-400').forEach(el => {
+                if (el.id === 'display-username') {
+                    el.className = `text-${primaryColor}-600 dark:text-${primaryColor}-400 font-semibold`;
+                }
+            });
+        }
+
+        function setDarkMode(isDark) {
+            appState.darkMode = isDark;
+            saveToStorage();
+            const root = document.getElementById('html-root');
+            if (isDark) {
+                root.classList.add('dark');
+                document.getElementById('mode-dark-btn').classList.add('border-' + (THEME_CONFIGS[appState.theme]?.primary || 'rose') + '-500');
+                document.getElementById('mode-light-btn').classList.remove('border-slate-400');
+            } else {
+                root.classList.remove('dark');
+                document.getElementById('mode-light-btn').classList.add('border-slate-400');
+            }
+        }
+
+        function toggleSettingsDropdown() {
+            const dropdown = document.getElementById('settings-dropdown');
+            dropdown.classList.toggle('hidden');
+            if (!dropdown.classList.contains('hidden')) {
+                // Populate settings input fields if logged in
+                if (appState.currentUser) {
+                    document.getElementById('settings-guest-notice').classList.add('hidden');
+                    document.getElementById('settings-user-fields').classList.remove('hidden');
+                    document.getElementById('settings-input-username').value = appState.currentUser;
+                    document.getElementById('settings-input-email').value = appState.users[appState.currentUser].email || '';
+                    document.getElementById('settings-input-password').value = '';
+                } else {
+                    document.getElementById('settings-guest-notice').classList.remove('hidden');
+                    document.getElementById('settings-user-fields').classList.add('hidden');
+                }
+            }
+        }
+
+        function saveAccountSettings() {
+            if (!appState.currentUser) return;
+            const newUsername = document.getElementById('settings-input-username').value.trim();
+            const newEmail = document.getElementById('settings-input-email').value.trim();
+            const newPassword = document.getElementById('settings-input-password').value.trim();
+
+            if (!newUsername) {
+                showModal("Error", "Username cannot be empty.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                return;
+            }
+
+            let userData = appState.users[appState.currentUser];
+            if (newUsername !== appState.currentUser) {
+                if (appState.users[newUsername]) {
+                    showModal("Error", "Username already taken.", "fa-solid fa-triangle-exclamation", "text-rose-500");
+                    return;
+                }
+                appState.users[newUsername] = userData;
+                delete appState.users[appState.currentUser];
+                appState.currentUser = newUsername;
+                localStorage.setItem('ayce_current_user', newUsername);
+                document.getElementById('display-username').innerText = newUsername;
+            }
+
+            if (newEmail !== undefined) {
+                appState.users[appState.currentUser].email = newEmail;
+            }
+            if (newPassword) {
+                appState.users[appState.currentUser].password = newPassword;
+            }
+
+            saveToStorage();
+            toggleSettingsDropdown();
+            showModal("Settings Updated", "Your account settings have been successfully updated.", "fa-solid fa-check", "text-emerald-400");
         }
 
         // --- AUTHENTICATION MODAL LOGIC ---
@@ -502,13 +694,13 @@
                 subtitleEl.innerText = "Save your AYCE profit logs across sessions";
                 iconEl.className = "fa-solid fa-user-plus text-2xl";
                 submitText.innerText = "Create Account";
-                switchText.innerHTML = `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-rose-400 font-semibold hover:underline ml-1">Log In</button>`;
+                switchText.innerHTML = `Already have an account? <button type="button" onclick="toggleAuthMode()" class="text-rose-600 dark:text-rose-400 font-semibold hover:underline ml-1">Log In</button>`;
             } else {
                 titleEl.innerText = "Welcome Back";
                 subtitleEl.innerText = "Log in to access your saved feast history";
                 iconEl.className = "fa-solid fa-right-to-bracket text-2xl";
                 submitText.innerText = "Log In";
-                switchText.innerHTML = `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-rose-400 font-semibold hover:underline ml-1">Sign Up</button>`;
+                switchText.innerHTML = `Don't have an account? <button type="button" onclick="toggleAuthMode()" class="text-rose-600 dark:text-rose-400 font-semibold hover:underline ml-1">Sign Up</button>`;
             }
         }
 
@@ -529,12 +721,12 @@
                     showModal("Error", "Username already exists. Please log in instead.", "fa-solid fa-triangle-exclamation", "text-rose-500");
                     return;
                 }
-                // Migrate guest logs if any exist upon first signup
                 let startingLogs = [...appState.guestData.logs];
                 let startingCustomItems = [...appState.guestData.customItems];
 
                 appState.users[user] = {
                     password: pass,
+                    email: '',
                     logs: startingLogs,
                     customPrices: { ...appState.guestData.customPrices },
                     customItems: startingCustomItems
@@ -544,13 +736,10 @@
                 saveToStorage();
 
                 closeAuthModal();
-                document.getElementById('display-username').innerText = user;
-                document.getElementById('auth-buttons-container').classList.add('hidden');
-                document.getElementById('logout-button').classList.remove('hidden');
+                setupUserLoggedInUI(user);
                 refreshDashboard();
                 showModal("Account Created!", `Welcome, ${user}! Your account has been created successfully.`, "fa-solid fa-check", "text-emerald-400");
             } else {
-                // Login
                 if (!appState.users[user] || appState.users[user].password !== pass) {
                     showModal("Authentication Error", "Invalid username or password.", "fa-solid fa-triangle-exclamation", "text-rose-500");
                     return;
@@ -560,9 +749,7 @@
                 saveToStorage();
 
                 closeAuthModal();
-                document.getElementById('display-username').innerText = user;
-                document.getElementById('auth-buttons-container').classList.add('hidden');
-                document.getElementById('logout-button').classList.remove('hidden');
+                setupUserLoggedInUI(user);
                 refreshDashboard();
                 showModal("Logged In", `Welcome back, ${user}!`, "fa-solid fa-check", "text-emerald-400");
             }
@@ -571,11 +758,21 @@
         function handleLogout() {
             appState.currentUser = null;
             localStorage.removeItem('ayce_current_user');
+            setupGuestUI();
+            refreshDashboard();
+            showModal("Logged Out", "You are now browsing in guest mode.", "fa-solid fa-info", "text-indigo-400");
+        }
+
+        function setupUserLoggedInUI(username) {
+            document.getElementById('display-username').innerText = username;
+            document.getElementById('auth-buttons-container').classList.add('hidden');
+            document.getElementById('logout-button').classList.remove('hidden');
+        }
+
+        function setupGuestUI() {
             document.getElementById('display-username').innerText = 'Guest Session';
             document.getElementById('auth-buttons-container').classList.remove('hidden');
             document.getElementById('logout-button').classList.add('hidden');
-            refreshDashboard();
-            showModal("Logged Out", "You are now browsing in guest mode.", "fa-solid fa-info", "text-indigo-400");
         }
 
         // --- NAVIGATION ---
@@ -587,19 +784,23 @@
                 if (t === tabId) {
                     if(el) el.classList.remove('hidden');
                     if(nav) {
-                        nav.className = "px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-rose-600 text-white shadow-md shadow-rose-600/25";
+                        nav.className = `px-4 py-2 rounded-xl text-sm font-medium transition-colors bg-rose-600 text-white shadow-md shadow-rose-600/25`;
                     }
                 } else {
                     if(el) el.classList.add('hidden');
                     if(nav) {
-                        nav.className = "px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-300 hover:bg-slate-800";
+                        nav.className = "px-4 py-2 rounded-xl text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800";
                     }
                 }
             });
 
-            if (tabId === 'dashboard') refreshDashboard();
+            if (tabId === 'dashboard') {
+                cancelEditFeast();
+                refreshDashboard();
+            }
             if (tabId === 'logger') initLoggerForm();
             if (tabId === 'market') renderMarketRates();
+            applyTheme(appState.theme);
         }
 
         // --- MARKET PRICING HELPER ---
@@ -608,7 +809,6 @@
             if (store && store.customPrices && store.customPrices[dateStr] && store.customPrices[dateStr][itemName] !== undefined) {
                 return store.customPrices[dateStr][itemName];
             }
-            // Fallback to default
             if (RESTAURANT_MENUS[category]) {
                 for (let sub in RESTAURANT_MENUS[category]) {
                     const found = RESTAURANT_MENUS[category][sub].find(i => i.name === itemName);
@@ -619,18 +819,25 @@
                 const cFound = store.customItems.find(i => i.name === itemName);
                 if (cFound) return cFound.defaultPrice;
             }
-            return 5.00; // default fallback
+            return 5.00;
         }
 
-        // --- LOGGER LOGIC ---
+        // --- LOGGER & EDITING LOGIC ---
         function initLoggerForm() {
-            activeLoggerQuantities = {};
+            if (!editingFeastId) {
+                activeLoggerQuantities = {};
+                document.getElementById('logger-title-heading').innerText = "New AYCE Feast Logger";
+                document.getElementById('save-feast-btn-text').innerText = "Save Feast Log";
+                document.getElementById('cancel-edit-btn').classList.add('hidden');
+            }
             renderLoggerItems();
             updateLiveFeastValue();
         }
 
         function onCategoryChange() {
-            activeLoggerQuantities = {};
+            if (!editingFeastId) {
+                activeLoggerQuantities = {};
+            }
             renderLoggerItems();
             updateLiveFeastValue();
         }
@@ -644,25 +851,24 @@
             const dateStr = document.getElementById('log-date').value || new Date().toISOString().split('T')[0];
             const store = getCurrentStore();
 
-            // Render standard menu categories
             for (let subcat in menu) {
-                let html = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-                    <h5 class="font-semibold text-rose-400 text-xs uppercase tracking-wider">${subcat}</h5>
+                let html = `<div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
+                    <h5 class="font-semibold text-rose-600 dark:text-rose-400 text-xs uppercase tracking-wider">${subcat}</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
 
                 menu[subcat].forEach(item => {
                     const price = getItemPriceForDate(cat, item.name, dateStr);
                     const qty = activeLoggerQuantities[item.name] || 0;
                     html += `
-                        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
                             <div>
-                                <p class="text-sm font-medium text-white">${item.name}</p>
-                                <p class="text-xs text-slate-400">$${price.toFixed(2)} / unit</p>
+                                <p class="text-sm font-medium text-slate-900 dark:text-white">${item.name}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">$${price.toFixed(2)} / unit</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
-                                <span id="qty-${item.name}" class="w-8 text-center text-sm font-bold text-white">${qty}</span>
-                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
+                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
+                                <span id="qty-${sanitizeId(item.name)}" class="w-8 text-center text-sm font-bold text-slate-900 dark:text-white">${qty}</span>
+                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
                             </div>
                         </div>
                     `;
@@ -671,25 +877,24 @@
                 container.innerHTML += html;
             }
 
-            // Render custom items if any
             if (store && store.customItems && store.customItems.length > 0) {
-                let html = `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3">
-                    <h5 class="font-semibold text-amber-400 text-xs uppercase tracking-wider">Custom Feasts Items</h5>
+                let html = `<div class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
+                    <h5 class="font-semibold text-amber-500 dark:text-amber-400 text-xs uppercase tracking-wider">Custom Feasts Items</h5>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
 
                 store.customItems.forEach(item => {
                     const price = getItemPriceForDate(cat, item.name, dateStr);
                     const qty = activeLoggerQuantities[item.name] || 0;
                     html += `
-                        <div class="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800/80">
                             <div>
-                                <p class="text-sm font-medium text-white">${item.name}</p>
-                                <p class="text-xs text-slate-400">$${price.toFixed(2)} / unit</p>
+                                <p class="text-sm font-medium text-slate-900 dark:text-white">${item.name}</p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">$${price.toFixed(2)} / unit</p>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
-                                <span id="qty-${item.name}" class="w-8 text-center text-sm font-bold text-white">${qty}</span>
-                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
+                                <button type="button" onclick="adjustQty('${item.name}', -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition-colors">-</button>
+                                <span id="qty-${sanitizeId(item.name)}" class="w-8 text-center text-sm font-bold text-slate-900 dark:text-white">${qty}</span>
+                                <button type="button" onclick="adjustQty('${item.name}', 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center font-bold transition-colors">+</button>
                             </div>
                         </div>
                     `;
@@ -704,7 +909,7 @@
             const updated = Math.max(0, current + delta);
             activeLoggerQuantities[itemName] = updated;
             
-            const badge = document.getElementById('qty-' + itemName);
+            const badge = document.getElementById('qty-' + sanitizeId(itemName));
             if (badge) badge.innerText = updated;
 
             updateLiveFeastValue();
@@ -780,24 +985,77 @@
             }
 
             const profit = totalMarketValue - ticketPrice;
-
-            const newLog = {
-                id: 'log_' + Date.now(),
-                category: cat,
-                date: dateStr,
-                ticketPrice: ticketPrice,
-                totalMarketValue: totalMarketValue,
-                profit: profit,
-                items: itemsConsumed
-            };
-
             const store = getCurrentStore();
             if (!store.logs) store.logs = [];
-            store.logs.unshift(newLog); // newest first
-            saveToStorage();
 
-            showModal("Feast Saved!", `Successfully logged feast! Market Value: $${totalMarketValue.toFixed(2)} | Profit: $${profit.toFixed(2)}`, "fa-solid fa-utensils", "text-emerald-400");
+            if (editingFeastId) {
+                // Update existing
+                const index = store.logs.findIndex(l => l.id === editingFeastId);
+                if (index !== -1) {
+                    store.logs[index] = {
+                        id: editingFeastId,
+                        category: cat,
+                        date: dateStr,
+                        ticketPrice: ticketPrice,
+                        totalMarketValue: totalMarketValue,
+                        profit: profit,
+                        items: itemsConsumed
+                    };
+                }
+                editingFeastId = null;
+                saveToStorage();
+                showModal("Feast Updated!", `Successfully updated feast log!`, "fa-solid fa-utensils", "text-emerald-400");
+            } else {
+                // Create new
+                const newLog = {
+                    id: 'log_' + Date.now(),
+                    category: cat,
+                    date: dateStr,
+                    ticketPrice: ticketPrice,
+                    totalMarketValue: totalMarketValue,
+                    profit: profit,
+                    items: itemsConsumed
+                };
+                store.logs.unshift(newLog);
+                saveToStorage();
+                showModal("Feast Saved!", `Successfully logged feast! Market Value: $${totalMarketValue.toFixed(2)} | Profit: $${profit.toFixed(2)}`, "fa-solid fa-utensils", "text-emerald-400");
+            }
+
+            cancelEditFeast();
             switchTab('dashboard');
+        }
+
+        function editLog(logId) {
+            const store = getCurrentStore();
+            if (!store || !store.logs) return;
+            const log = store.logs.find(l => l.id === logId);
+            if (!log) return;
+
+            editingFeastId = logId;
+            switchTab('logger');
+
+            document.getElementById('log-category').value = log.category;
+            document.getElementById('log-date').value = log.date;
+            document.getElementById('log-ticket-price').value = log.ticketPrice;
+
+            activeLoggerQuantities = {};
+            for (let itemName in log.items) {
+                activeLoggerQuantities[itemName] = log.items[itemName].qty;
+            }
+
+            document.getElementById('logger-title-heading').innerText = "Edit AYCE Feast Log";
+            document.getElementById('save-feast-btn-text').innerText = "Update Feast Log";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+            renderLoggerItems();
+            updateLiveFeastValue();
+        }
+
+        function cancelEditFeast() {
+            editingFeastId = null;
+            document.getElementById('logger-title-heading').innerText = "New AYCE Feast Logger";
+            document.getElementById('save-feast-btn-text').innerText = "Save Feast Log";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
         // --- DASHBOARD RENDERING ---
@@ -822,30 +1080,33 @@
             tbody.innerHTML = '';
 
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500">No feast logs recorded yet. Click "New Session" to start tracking!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-400 dark:text-slate-500">No feast logs recorded yet. Click "New Session" to start tracking!</td></tr>`;
                 return;
             }
 
             logs.forEach(l => {
                 const isProfitPositive = l.profit >= 0;
-                const profitClass = isProfitPositive ? 'text-emerald-400' : 'text-rose-400';
+                const profitClass = isProfitPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
                 const profitIcon = isProfitPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
 
-                let itemsDetail = '<ul class="text-xs text-slate-400 space-y-1 mt-2">';
+                let itemsDetail = '<ul class="text-xs text-slate-500 dark:text-slate-400 space-y-1 mt-2">';
                 for (let k in l.items) {
                     itemsDetail += `<li>• ${k} x${l.items[k].qty} ($${l.items[k].historicalPrice.toFixed(2)} ea)</li>`;
                 }
                 itemsDetail += '</ul>';
 
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-900/40 transition-colors">
-                        <td class="p-4 font-medium text-white">${l.date}</td>
-                        <td class="p-4"><span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg text-xs font-semibold">${l.category}</span></td>
-                        <td class="p-4 text-slate-300">$${l.ticketPrice.toFixed(2)}</td>
-                        <td class="p-4 text-slate-300">$${l.totalMarketValue.toFixed(2)} ${itemsDetail}</td>
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                        <td class="p-4 font-medium text-slate-900 dark:text-white">${l.date}</td>
+                        <td class="p-4"><span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg text-xs font-semibold">${l.category}</span></td>
+                        <td class="p-4 text-slate-700 dark:text-slate-300">$${l.ticketPrice.toFixed(2)}</td>
+                        <td class="p-4 text-slate-700 dark:text-slate-300">$${l.totalMarketValue.toFixed(2)} ${itemsDetail}</td>
                         <td class="p-4 font-bold ${profitClass}"><i class="fa-solid ${profitIcon} mr-1"></i> $${l.profit.toFixed(2)}</td>
-                        <td class="p-4 text-right">
-                            <button onclick="deleteLog('${l.id}')" class="p-2 text-slate-500 hover:text-rose-400 transition-colors rounded-lg hover:bg-slate-800" title="Delete Log">
+                        <td class="p-4 text-right space-x-1">
+                            <button onclick="editLog('${l.id}')" class="p-2 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" title="Edit Log">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteLog('${l.id}')" class="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" title="Delete Log">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
@@ -871,7 +1132,7 @@
                 if (c === cat) {
                     btn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors bg-rose-600 text-white";
                 } else {
-                    btn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-400 hover:bg-slate-900";
+                    btn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition-colors text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900";
                 }
             });
             renderMarketRates();
@@ -889,18 +1150,18 @@
                 menu[subcat].forEach(item => {
                     const currentPrice = getItemPriceForDate(marketCategoryTab, item.name, dateStr);
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-900/40 transition-colors">
-                            <td class="p-4 font-medium text-white">${item.name}</td>
-                            <td class="p-4 text-xs text-slate-400">${subcat}</td>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 font-medium text-slate-900 dark:text-white">${item.name}</td>
+                            <td class="p-4 text-xs text-slate-500 dark:text-slate-400">${subcat}</td>
                             <td class="p-4">
                                 <div class="flex items-center space-x-2 max-w-xs">
-                                    <span class="text-slate-500">$</span>
+                                    <span class="text-slate-400">$</span>
                                     <input type="number" step="0.01" id="price-input-${sanitizeId(item.name)}" value="${currentPrice.toFixed(2)}"
-                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-rose-500">
+                                        class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white focus:outline-none">
                                 </div>
                             </td>
                             <td class="p-4 text-right">
-                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                                     Update Rate
                                 </button>
                             </td>
@@ -909,23 +1170,22 @@
                 });
             }
 
-            // Also render custom items if in their category context
             if (store && store.customItems) {
                 store.customItems.forEach(item => {
                     const currentPrice = getItemPriceForDate(marketCategoryTab, item.name, dateStr);
                     tbody.innerHTML += `
-                        <tr class="hover:bg-slate-900/40 transition-colors">
-                            <td class="p-4 font-medium text-amber-400">${item.name} <span class="text-xs bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded ml-2">Custom</span></td>
-                            <td class="p-4 text-xs text-slate-400">Custom Items</td>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                            <td class="p-4 font-medium text-amber-500 dark:text-amber-400">${item.name} <span class="text-xs bg-amber-500/10 text-amber-500 dark:text-amber-400 px-2 py-0.5 rounded ml-2">Custom</span></td>
+                            <td class="p-4 text-xs text-slate-500 dark:text-slate-400">Custom Items</td>
                             <td class="p-4">
                                 <div class="flex items-center space-x-2 max-w-xs">
-                                    <span class="text-slate-500">$</span>
+                                    <span class="text-slate-400">$</span>
                                     <input type="number" step="0.01" id="price-input-${sanitizeId(item.name)}" value="${currentPrice.toFixed(2)}"
-                                        class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-rose-500">
+                                        class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-white focus:outline-none">
                                 </div>
                             </td>
                             <td class="p-4 text-right">
-                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
+                                <button onclick="saveMarketPrice('${marketCategoryTab}', '${item.name}', '${dateStr}')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors">
                                     Update Rate
                                 </button>
                             </td>
@@ -963,7 +1223,7 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = message;
             const iconContainer = document.getElementById('modal-icon');
-            iconContainer.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl border ${iconColorClass} bg-slate-950`;
+            iconContainer.className = `w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl border ${iconColorClass} bg-slate-50 dark:bg-slate-950`;
             iconContainer.innerHTML = `<i class="${iconClass}"></i>`;
             document.getElementById('notification-modal').classList.remove('hidden');
         }
